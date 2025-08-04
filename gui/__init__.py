@@ -9,4 +9,4 @@ Contains tkinter-based user interface components.
 
 from .gui import BurnerCalculatorGUI
 
-__all__ = ['BurnerCalculatorGUI']
+__all__ = ["BurnerCalculatorGUI"]

@@ -5,7 +5,7 @@ Burner calculation modules package.
 
 This package contains all calculation modules for gas burner design:
 - combustion: Combustion calculations and stoichiometry
-- burner_design: Burner dimensioning and design  
+- burner_design: Burner dimensioning and design
 - chamber_design: Combustion chamber design and heat transfer
 - radiation: Radiation heat transfer calculations
 - pressure_losses: Pressure loss calculations for piping systems
@@ -23,16 +23,16 @@ from .radiation import RadiationCalculator, RadiationResults
 from .pressure_losses import PressureLossCalculator, PressureLossResults, PipeSegment, Fitting
 
 __all__ = [
-    'CombustionCalculator',
-    'CombustionResults', 
-    'BurnerDesigner',
-    'BurnerDesignResults',
-    'ChamberDesigner', 
-    'ChamberDesignResults',
-    'RadiationCalculator',
-    'RadiationResults',
-    'PressureLossCalculator',
-    'PressureLossResults',
-    'PipeSegment',
-    'Fitting'
+    "CombustionCalculator",
+    "CombustionResults",
+    "BurnerDesigner",
+    "BurnerDesignResults",
+    "ChamberDesigner",
+    "ChamberDesignResults",
+    "RadiationCalculator",
+    "RadiationResults",
+    "PressureLossCalculator",
+    "PressureLossResults",
+    "PipeSegment",
+    "Fitting",
 ]
