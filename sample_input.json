@@ -1,0 +1,15 @@
+{
+  "fuel_type": "natural_gas",
+  "fuel_flow_rate": 0.01,
+  "excess_air_ratio": 1.2,
+  "ambient_temperature": 20,
+  "ambient_pressure": 101325,
+  "max_gas_velocity": 50,
+  "supply_pressure": 3000,
+  "heat_output": 500,
+  "max_chamber_temp": 1200,
+  "heat_release_density": 800,
+  "description": "Vzorové vstupní parametry pro návrh plynového hořáku",
+  "created_by": "Burner Calculator GUI v1.0",
+  "created_date": "2024-01-01"
+}

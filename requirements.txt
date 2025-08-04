@@ -1,0 +1,20 @@
+# requirements.txt
+#
+# Python dependencies for the Gas Burner Calculator application
+# Install with: pip install -r requirements.txt
+
+# Core scientific computing
+numpy>=1.20.0
+pandas>=1.3.0
+
+# Excel export support
+openpyxl>=3.0.0
+
+# Optional: Enhanced numerical computations
+scipy>=1.7.0
+
+# Optional: Plotting capabilities (if needed in future)
+matplotlib>=3.5.0
+
+# Optional: Additional GUI enhancements
+# pillow>=8.0.0  # For image handling if needed

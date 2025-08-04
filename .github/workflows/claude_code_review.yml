@@ -1,0 +1,46 @@
+# Název workflow, který se zobrazí na GitHubu
+name: Claude AI Code Review
+
+# Spouštěč (trigger) - tato akce se spustí při každém otevření nebo aktualizaci Pull Requestu na větev 'main'
+on:
+  pull_request:
+    branches:
+      - main
+
+# Úlohy, které se mají provést
+jobs:
+  code-review:
+    # Běží na virtuálním stroji s Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      # Krok 1: Získá kód z repozitáře, aby k němu měla akce přístup
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Krok 2: Nastaví prostředí (zde Node.js, pokud je Claude Code nainstalován přes npm)
+      # Nahraďte podle toho, jak máte Claude Code nainstalován (např. setup-python)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Krok 3: Instalace Claude Code (příklad pro npm)
+      - name: Install Claude Code
+        run: npm install -g claude-code-cli # Nahraďte skutečným instalačním příkazem
+
+      # Krok 4: Spuštění revize a publikování komentáře
+      - name: Run Claude Code Review and Post Comment
+        env:
+          # Nastavení proměnných prostředí
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # Použije secret, který jsme vytvořili
+          PR_NUMBER: ${{ github.event.pull_request.number }} # Automaticky získá číslo PR
+          REPO: ${{ github.repository }}
+        run: |
+          # Spustí Claude Code v bezhlavém režimu s naším specializovaným promptem
+          # a uloží jeho výstup do proměnné REVIEW_COMMENT
+          REVIEW_COMMENT=$(claude -p "$(< .claude/prompts/pr_review_prompt.md)")
+
+          # Použije GitHub CLI (gh) k publikování výstupu jako komentář k Pull Requestu
+          # Poznámka: `gh` je na virtuálních strojích GitHubu obvykle předinstalován
+          gh pr comment $PR_NUMBER --repo $REPO --body "$REVIEW_COMMENT"

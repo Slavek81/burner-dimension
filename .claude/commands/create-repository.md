@@ -1,0 +1,1 @@
+Vytvoř na mém githubu repoziřát s názvem: $ARGUMENTS.

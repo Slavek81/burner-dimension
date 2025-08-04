@@ -1,0 +1,89 @@
+{
+  "fuels": {
+    "natural_gas": {
+      "name": "Zemní plyn",
+      "composition": {
+        "CH4": 0.95,
+        "C2H6": 0.03,
+        "C3H8": 0.01,
+        "N2": 0.01
+      },
+      "properties": {
+        "lower_heating_value_mass": 50000000,
+        "lower_heating_value_volume": 35800000,
+        "density": 0.72,
+        "specific_gravity": 0.60,
+        "air_fuel_ratio_mass": 17.2,
+        "air_fuel_ratio_volume": 9.7,
+        "stoichiometric_air_requirement": 9.7,
+        "molecular_weight": 16.04
+      }
+    },
+    "methane": {
+      "name": "Methan",
+      "composition": {
+        "CH4": 1.0
+      },
+      "properties": {
+        "lower_heating_value_mass": 50000000,
+        "lower_heating_value_volume": 35800000,
+        "density": 0.667,
+        "specific_gravity": 0.55,
+        "air_fuel_ratio_mass": 17.2,
+        "air_fuel_ratio_volume": 9.7,
+        "stoichiometric_air_requirement": 9.7,
+        "molecular_weight": 16.04
+      }
+    },
+    "propane": {
+      "name": "Propan",
+      "composition": {
+        "C3H8": 1.0
+      },
+      "properties": {
+        "lower_heating_value_mass": 46400000,
+        "lower_heating_value_volume": 93200000,
+        "density": 1.87,
+        "specific_gravity": 1.52,
+        "air_fuel_ratio_mass": 15.5,
+        "air_fuel_ratio_volume": 23.9,
+        "stoichiometric_air_requirement": 23.9,
+        "molecular_weight": 44.1
+      }
+    }
+  },
+  "constants": {
+    "universal_gas_constant": 8314,
+    "stefan_boltzmann_constant": 5.67e-8,
+    "standard_temperature": 273.15,
+    "standard_pressure": 101325,
+    "air_density_stp": 1.225,
+    "air_molecular_weight": 28.97
+  },
+  "conversion_factors": {
+    "btu_h_to_w": 0.293,
+    "ft3_h_to_m3_h": 0.0283,
+    "psi_to_kpa": 6.895,
+    "inch_wc_to_pa": 249,
+    "fahrenheit_to_celsius_offset": 32,
+    "fahrenheit_to_celsius_scale": 1.8
+  },
+  "material_properties": {
+    "steel_oxidized": {
+      "emissivity": 0.79,
+      "temperature_range": [200, 600]
+    },
+    "refractory_brick": {
+      "emissivity": 0.75,
+      "temperature_range": [1000, 1500]
+    },
+    "flame_gases": {
+      "emissivity": 0.2,
+      "temperature_range": [1000, 1500]
+    },
+    "soot_particles": {
+      "emissivity": 0.85,
+      "temperature_range": [1000, 1500]
+    }
+  }
+}
