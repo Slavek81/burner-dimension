@@ -67,6 +67,7 @@ class ChamberDesigner:
         combustion_calculator: CombustionCalculator = None,
         burner_designer: BurnerDesigner = None,
         safety_factor: float = 1.5,
+        fuel_data_path: str = None,
     ):
         """
         Initialize the chamber designer.
@@ -75,13 +76,18 @@ class ChamberDesigner:
             combustion_calculator (CombustionCalculator, optional): Combustion calculator instance
             burner_designer (BurnerDesigner, optional): Burner designer instance
             safety_factor (float): Safety factor for design calculations
+            fuel_data_path (str, optional): Path to fuel data file
         """
-        self.combustion_calc = combustion_calculator or CombustionCalculator()
+        self.combustion_calc = combustion_calculator or CombustionCalculator(
+            fuel_data_path=fuel_data_path
+        )
         self.burner_designer = burner_designer or BurnerDesigner(self.combustion_calc)
         self.safety_factor = safety_factor
 
         # Design constants
-        self.MIN_RESIDENCE_TIME = 0.1  # s, minimum residence time for complete combustion
+        self.MIN_RESIDENCE_TIME = (
+            0.1  # s, minimum residence time for complete combustion
+        )
         self.MAX_RESIDENCE_TIME = 10.0  # s, maximum practical residence time
         self.MAX_VOLUME_HEAT_RATE = 3e6  # W/m³, maximum volume heat release rate
         self.MIN_CHAMBER_DIAMETER = 0.1  # m, minimum practical chamber diameter
@@ -119,10 +125,14 @@ class ChamberDesigner:
             raise ValueError("Požadovaný výkon musí být větší než nula")
 
         if target_residence_time < self.MIN_RESIDENCE_TIME:
-            raise ValueError(f"Doba zdržení je příliš krátká. Minimum: {self.MIN_RESIDENCE_TIME} s")
+            raise ValueError(
+                f"Doba zdržení je příliš krátká. Minimum: {self.MIN_RESIDENCE_TIME} s"
+            )
 
         if target_residence_time > self.MAX_RESIDENCE_TIME:
-            raise ValueError(f"Doba zdržení je příliš dlouhá. Maximum: {self.MAX_RESIDENCE_TIME} s")
+            raise ValueError(
+                f"Doba zdržení je příliš dlouhá. Maximum: {self.MAX_RESIDENCE_TIME} s"
+            )
 
         # Get fuel properties and calculate combustion
         fuel_props = self.combustion_calc.get_fuel_properties(fuel_type)["properties"]
@@ -137,11 +147,13 @@ class ChamberDesigner:
             combustion_results, combustion_results.adiabatic_flame_temperature
         )
 
-        chamber_volume = flue_gas_volume_flow * target_residence_time * self.safety_factor
+        chamber_volume = (
+            flue_gas_volume_flow * target_residence_time * self.safety_factor
+        )
 
         # Calculate chamber dimensions
-        chamber_diameter, chamber_length, chamber_area = self._calculate_chamber_dimensions(
-            chamber_volume
+        chamber_diameter, chamber_length, chamber_area = (
+            self._calculate_chamber_dimensions(chamber_volume)
         )
 
         # Calculate volume heat release rate
@@ -150,8 +162,8 @@ class ChamberDesigner:
         if volume_heat_release_rate > self.MAX_VOLUME_HEAT_RATE:
             # Increase chamber size if heat release rate is too high
             chamber_volume = required_power / self.MAX_VOLUME_HEAT_RATE
-            chamber_diameter, chamber_length, chamber_area = self._calculate_chamber_dimensions(
-                chamber_volume
+            chamber_diameter, chamber_length, chamber_area = (
+                self._calculate_chamber_dimensions(chamber_volume)
             )
             volume_heat_release_rate = required_power / chamber_volume
 
@@ -178,7 +190,10 @@ class ChamberDesigner:
         )
 
         heat_loss_rate = self._calculate_heat_loss(
-            chamber_surface_area, wall_temperature, ambient_temperature, wall_insulation_thickness
+            chamber_surface_area,
+            wall_temperature,
+            ambient_temperature,
+            wall_insulation_thickness,
         )
 
         # Calculate thermal efficiency
@@ -222,13 +237,15 @@ class ChamberDesigner:
         pressure = constants["standard_pressure"]  # Assume atmospheric pressure
         molecular_weight = constants["air_molecular_weight"] / 1000  # kg/mol
 
-        volume_flow = (combustion_results.flue_gas_flow_rate * gas_constant * gas_temperature) / (
-            pressure * molecular_weight
-        )
+        volume_flow = (
+            combustion_results.flue_gas_flow_rate * gas_constant * gas_temperature
+        ) / (pressure * molecular_weight)
 
         return volume_flow
 
-    def _calculate_chamber_dimensions(self, volume: float) -> Tuple[float, float, float]:
+    def _calculate_chamber_dimensions(
+        self, volume: float
+    ) -> Tuple[float, float, float]:
         """
         Calculate chamber dimensions based on required volume.
 
@@ -243,7 +260,9 @@ class ChamberDesigner:
         diameter = (4 * volume / (math.pi * self.TYPICAL_LD_RATIO)) ** (1 / 3)
 
         # Apply practical limits
-        diameter = max(self.MIN_CHAMBER_DIAMETER, min(self.MAX_CHAMBER_DIAMETER, diameter))
+        diameter = max(
+            self.MIN_CHAMBER_DIAMETER, min(self.MAX_CHAMBER_DIAMETER, diameter)
+        )
 
         # Calculate length and area
         length = self.TYPICAL_LD_RATIO * diameter
@@ -273,7 +292,9 @@ class ChamberDesigner:
             1.0 * math.pi * chamber_diameter**2 / 4  # Assuming ρ ≈ 1 kg/m³ at high temp
         )
 
-        reynolds = 1.0 * gas_velocity * chamber_diameter / 2e-5  # ν ≈ 2e-5 m²/s for hot gases
+        reynolds = (
+            1.0 * gas_velocity * chamber_diameter / 2e-5
+        )  # ν ≈ 2e-5 m²/s for hot gases
 
         # Nusselt number correlation for turbulent flow
         if reynolds > 2300:
@@ -372,7 +393,9 @@ class ChamberDesigner:
         h_external = 10.0  # W/m²K
 
         # Overall heat transfer coefficient through insulation
-        u_overall = 1 / (insulation_thickness / insulation_conductivity + 1 / h_external)
+        u_overall = 1 / (
+            insulation_thickness / insulation_conductivity + 1 / h_external
+        )
 
         # Heat loss calculation
         heat_loss = u_overall * surface_area * (wall_temperature - ambient_temperature)
@@ -409,7 +432,9 @@ class ChamberDesigner:
             decay_constant = 2.0 / design_results.chamber_length
             temperature = inlet_temperature * math.exp(
                 -decay_constant * position
-            ) + design_results.wall_temperature * (1 - math.exp(-decay_constant * position))
+            ) + design_results.wall_temperature * (
+                1 - math.exp(-decay_constant * position)
+            )
             temperatures.append(temperature)
 
         return {"positions": positions, "temperatures": temperatures}
@@ -426,7 +451,9 @@ class ChamberDesigner:
         """
         validation = {
             "residence_time_adequate": (
-                self.MIN_RESIDENCE_TIME <= design_results.residence_time <= self.MAX_RESIDENCE_TIME
+                self.MIN_RESIDENCE_TIME
+                <= design_results.residence_time
+                <= self.MAX_RESIDENCE_TIME
             ),
             "volume_heat_rate_acceptable": (
                 design_results.volume_heat_release_rate <= self.MAX_VOLUME_HEAT_RATE
@@ -440,7 +467,8 @@ class ChamberDesigner:
                 design_results.thermal_efficiency >= 70.0  # Minimum 70% efficiency
             ),
             "wall_temperature_safe": (
-                design_results.wall_temperature <= 1800.0  # Maximum safe wall temperature
+                design_results.wall_temperature
+                <= 1800.0  # Maximum safe wall temperature
             ),
         }
 
@@ -462,9 +490,13 @@ class ChamberDesigner:
 
         if not validation["residence_time_adequate"]:
             if design_results.residence_time < self.MIN_RESIDENCE_TIME:
-                recommendations.append("Doba zdržení je příliš krátká - zvětšete objem komory")
+                recommendations.append(
+                    "Doba zdržení je příliš krátká - zvětšete objem komory"
+                )
             else:
-                recommendations.append("Doba zdržení je příliš dlouhá - zmenšete objem komory")
+                recommendations.append(
+                    "Doba zdržení je příliš dlouhá - zmenšete objem komory"
+                )
 
         if not validation["volume_heat_rate_acceptable"]:
             recommendations.append(
@@ -477,7 +509,9 @@ class ChamberDesigner:
             )
 
         if design_results.wall_temperature > 1600:
-            recommendations.append("Vysoká teplota stěny - zvyšte chlazení nebo izolaci")
+            recommendations.append(
+                "Vysoká teplota stěny - zvyšte chlazení nebo izolaci"
+            )
 
         if design_results.chamber_length / design_results.chamber_diameter > 5:
             recommendations.append("Velmi dlouhá komora - zvažte jiný poměr L/D")
@@ -510,18 +544,25 @@ def main():
         print(f"Průměr komory: {results.chamber_diameter*1000:.0f} mm")
         print(f"Délka komory: {results.chamber_length*1000:.0f} mm")
         print(f"Doba zdržení: {results.residence_time:.2f} s")
-        print(f"Objemová hustota tepelného toku: {results.volume_heat_release_rate/1e6:.2f} MW/m³")
+        print(
+            f"Objemová hustota tepelného toku: {results.volume_heat_release_rate/1e6:.2f} MW/m³"
+        )
         print(f"Teplota stěny: {results.wall_temperature-273.15:.0f} °C")
         print(f"Tepelná účinnost: {results.thermal_efficiency:.1f} %")
         print(f"Tepelné ztráty: {results.heat_loss_rate/1000:.1f} kW")
 
         # Temperature distribution
         temp_dist = designer.calculate_temperature_distribution(
-            results, designer.combustion_calc.calculate_combustion_products(fuel_type, 0.002, 1.2)
+            results,
+            designer.combustion_calc.calculate_combustion_products(
+                fuel_type, 0.002, 1.2
+            ),
         )
 
         print("\nTeplotní profil:")
-        for i, (pos, temp) in enumerate(zip(temp_dist["positions"], temp_dist["temperatures"])):
+        for i, (pos, temp) in enumerate(
+            zip(temp_dist["positions"], temp_dist["temperatures"])
+        ):
             if i % 3 == 0:  # Print every 3rd point
                 print(f"Pozice {pos*1000:.0f} mm: {temp-273.15:.0f} °C")
 

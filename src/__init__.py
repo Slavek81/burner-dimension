@@ -20,7 +20,12 @@ from .combustion import CombustionCalculator, CombustionResults
 from .burner_design import BurnerDesigner, BurnerDesignResults
 from .chamber_design import ChamberDesigner, ChamberDesignResults
 from .radiation import RadiationCalculator, RadiationResults
-from .pressure_losses import PressureLossCalculator, PressureLossResults, PipeSegment, Fitting
+from .pressure_losses import (
+    PressureLossCalculator,
+    PressureLossResults,
+    PipeSegment,
+    Fitting,
+)
 
 __all__ = [
     "CombustionCalculator",

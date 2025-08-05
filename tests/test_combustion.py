@@ -21,7 +21,9 @@ class TestCombustionCalculator(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.calculator = CombustionCalculator()
+        # Use correct path to data directory
+        data_path = os.path.join(os.path.dirname(__file__), "..", "data", "fuels.json")
+        self.calculator = CombustionCalculator(fuel_data_path=data_path)
 
     def test_methane_stoichiometric_air(self):
         """Test stoichiometric air calculation for methane."""

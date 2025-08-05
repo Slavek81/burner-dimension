@@ -30,17 +30,22 @@ jobs:
         run: npm install -g claude-code-cli # Nahraďte skutečným instalačním příkazem
 
       # Krok 4: Spuštění revize a publikování komentáře
-      - name: Run Claude Code Review and Post Comment
+      - name: Run Claude AI Review and comment if needed
         env:
-          # Nastavení proměnných prostředí
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # Použije secret, který jsme vytvořili
-          PR_NUMBER: ${{ github.event.pull_request.number }} # Automaticky získá číslo PR
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
-          # Spustí Claude Code v bezhlavém režimu s naším specializovaným promptem
-          # a uloží jeho výstup do proměnné REVIEW_COMMENT
-          REVIEW_COMMENT=$(claude -p "$(< .claude/prompts/pr_review_prompt.md)")
+          # Získání diffu pro daný PR
+          gh pr diff $PR_NUMBER --repo $REPO > pr.diff
 
-          # Použije GitHub CLI (gh) k publikování výstupu jako komentář k Pull Requestu
-          # Poznámka: `gh` je na virtuálních strojích GitHubu obvykle předinstalován
-          gh pr comment $PR_NUMBER --repo $REPO --body "$REVIEW_COMMENT"
+          # Vlož diff do promptu a zavolej Claude
+          REVIEW_COMMENT=$(claude --model claude-3-opus -p "$(cat .claude/prompts/pr_review_prompt.md)" -f pr.diff)
+
+          # Zkontroluj, jestli je výstup skutečná připomínka, nebo jen "✅ No issues..."
+          if [[ "$REVIEW_COMMENT" != "✅ No issues found in the PR." ]]; then
+            echo "Posting review comment..."
+            gh pr comment $PR_NUMBER --repo $REPO --body "$REVIEW_COMMENT"
+          else
+            echo "No issues found. Skipping comment."
+          fi

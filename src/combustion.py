@@ -89,7 +89,9 @@ class CombustionCalculator:
         except json.JSONDecodeError:
             raise json.JSONDecodeError(f"Neplatný JSON formát v souboru: {file_path}")
 
-    def calculate_stoichiometric_air(self, fuel_type: str, fuel_flow_rate: float) -> float:
+    def calculate_stoichiometric_air(
+        self, fuel_type: str, fuel_flow_rate: float
+    ) -> float:
         """
         Calculate stoichiometric air requirement for complete combustion.
 
@@ -140,7 +142,9 @@ class CombustionCalculator:
         fuel_props = self.fuel_data["fuels"][fuel_type]["properties"]
 
         # Calculate air flow rates
-        stoichiometric_air = self.calculate_stoichiometric_air(fuel_type, fuel_flow_rate)
+        stoichiometric_air = self.calculate_stoichiometric_air(
+            fuel_type, fuel_flow_rate
+        )
         actual_air_flow = stoichiometric_air * excess_air_ratio
 
         # Calculate flue gas flow rate
@@ -150,10 +154,14 @@ class CombustionCalculator:
         heat_release_rate = fuel_flow_rate * fuel_props["lower_heating_value_mass"]
 
         # Calculate adiabatic flame temperature (simplified calculation)
-        adiabatic_temp = self._calculate_adiabatic_temperature(fuel_type, excess_air_ratio)
+        adiabatic_temp = self._calculate_adiabatic_temperature(
+            fuel_type, excess_air_ratio
+        )
 
         # Calculate flue gas composition
-        co2_percent, o2_percent = self._calculate_flue_gas_composition(fuel_type, excess_air_ratio)
+        co2_percent, o2_percent = self._calculate_flue_gas_composition(
+            fuel_type, excess_air_ratio
+        )
 
         return CombustionResults(
             fuel_flow_rate=fuel_flow_rate,
@@ -166,7 +174,9 @@ class CombustionCalculator:
             o2_volume_percent=o2_percent,
         )
 
-    def _calculate_adiabatic_temperature(self, fuel_type: str, excess_air_ratio: float) -> float:
+    def _calculate_adiabatic_temperature(
+        self, fuel_type: str, excess_air_ratio: float
+    ) -> float:
         """
         Calculate adiabatic flame temperature.
 
@@ -184,7 +194,10 @@ class CombustionCalculator:
         # Adjust for excess air (cooling effect)
         excess_air_correction = 1.0 - (excess_air_ratio - 1.0) * 0.3
 
-        return base_temperature * excess_air_correction + self.constants["standard_temperature"]
+        return (
+            base_temperature * excess_air_correction
+            + self.constants["standard_temperature"]
+        )
 
     def _calculate_flue_gas_composition(
         self, fuel_type: str, excess_air_ratio: float
@@ -267,7 +280,9 @@ def main():
         print(f"Průtok paliva: {results.fuel_flow_rate:.4f} kg/s")
         print(f"Průtok vzduchu: {results.air_flow_rate:.4f} kg/s")
         print(f"Průtok spalin: {results.flue_gas_flow_rate:.4f} kg/s")
-        print(f"Adiabatická teplota plamene: {results.adiabatic_flame_temperature:.1f} K")
+        print(
+            f"Adiabatická teplota plamene: {results.adiabatic_flame_temperature:.1f} K"
+        )
         print(f"Tepelný výkon: {results.heat_release_rate/1000:.1f} kW")
         print(f"CO2 ve spalinách: {results.co2_volume_percent:.1f} %")
         print(f"O2 ve spalinách: {results.o2_volume_percent:.1f} %")

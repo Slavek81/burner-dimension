@@ -367,9 +367,11 @@ class BurnerCalculatorGUI:
 
         for key, value in defaults.items():
             if key in self.input_vars:
-                if isinstance(self.input_vars[key], ttk.Combobox):
+                try:
+                    # Try using set method (for Combobox)
                     self.input_vars[key].set(value)
-                else:
+                except AttributeError:
+                    # Fall back to delete/insert (for Entry)
                     self.input_vars[key].delete(0, tk.END)
                     self.input_vars[key].insert(0, value)
 

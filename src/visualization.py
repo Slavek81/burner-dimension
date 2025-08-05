@@ -31,7 +31,10 @@ class BurnerVisualization:
     """
 
     def __init__(
-        self, output_dir: str = "output", figure_size: Tuple[int, int] = (10, 8), dpi: int = 300
+        self,
+        output_dir: str = "output",
+        figure_size: Tuple[int, int] = (10, 8),
+        dpi: int = 300,
     ):
         """
         Initialize visualization manager.
@@ -120,7 +123,9 @@ class BurnerVisualization:
 
             # Save in requested formats
             saved_files = {}
-            base_filename = f"combustion_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            base_filename = (
+                f"combustion_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
 
             for fmt in save_formats:
                 filename = f"{base_filename}.{fmt}"
@@ -160,7 +165,9 @@ class BurnerVisualization:
                 components = list(pressure_data["components"].keys())
                 losses = list(pressure_data["components"].values())
 
-                bars = ax1.bar(components, losses, color=["red", "orange", "yellow", "green"])
+                bars = ax1.bar(
+                    components, losses, color=["red", "orange", "yellow", "green"]
+                )
                 ax1.set_title("Tlakové ztráty podle komponent")
                 ax1.set_ylabel("Tlak [Pa]")
                 ax1.tick_params(axis="x", rotation=45)
@@ -191,7 +198,9 @@ class BurnerVisualization:
 
             # Save files
             saved_files = {}
-            base_filename = f"pressure_losses_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            base_filename = (
+                f"pressure_losses_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
 
             for fmt in save_formats:
                 filename = f"{base_filename}.{fmt}"
@@ -223,7 +232,9 @@ class BurnerVisualization:
         """
         try:
             fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-            fig.suptitle("Rozložení teploty ve spalovací komoře", fontsize=16, fontweight="bold")
+            fig.suptitle(
+                "Rozložení teploty ve spalovací komoře", fontsize=16, fontweight="bold"
+            )
 
             if "temperature_field" in temperature_data:
                 temp_field = np.array(temperature_data["temperature_field"])
@@ -241,7 +252,9 @@ class BurnerVisualization:
                 y = np.linspace(0, temp_field.shape[0], temp_field.shape[0])
                 X, Y = np.meshgrid(x, y)
 
-                contours = ax2.contour(X, Y, temp_field, levels=10, colors="black", alpha=0.6)
+                contours = ax2.contour(
+                    X, Y, temp_field, levels=10, colors="black", alpha=0.6
+                )
                 ax2.clabel(contours, inline=True, fontsize=8)
                 im2 = ax2.contourf(X, Y, temp_field, levels=20, cmap="hot", alpha=0.8)
                 ax2.set_title("Izotermy")
@@ -254,7 +267,9 @@ class BurnerVisualization:
 
             # Save files
             saved_files = {}
-            base_filename = f"temperature_distribution_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            base_filename = (
+                f"temperature_distribution_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
 
             for fmt in save_formats:
                 filename = f"{base_filename}.{fmt}"
@@ -288,7 +303,9 @@ class BurnerVisualization:
         try:
             fig, ax = plt.subplots(1, 1, figsize=self.figure_size)
             ax.set_aspect("equal")
-            ax.set_title("Geometrie hořáku a spalovací komory", fontsize=16, fontweight="bold")
+            ax.set_title(
+                "Geometrie hořáku a spalovací komory", fontsize=16, fontweight="bold"
+            )
 
             # Draw combustion chamber
             if "chamber" in geometry_data:
@@ -375,7 +392,9 @@ class BurnerVisualization:
 
             # Save files
             saved_files = {}
-            base_filename = f"burner_geometry_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            base_filename = (
+                f"burner_geometry_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
 
             for fmt in save_formats:
                 filename = f"{base_filename}.{fmt}"
@@ -409,7 +428,9 @@ class BurnerVisualization:
         try:
             fig = plt.figure(figsize=(16, 12))
             fig.suptitle(
-                "Přehled výpočtu hořáku a spalovací komory", fontsize=20, fontweight="bold"
+                "Přehled výpočtu hořáku a spalovací komory",
+                fontsize=20,
+                fontweight="bold",
             )
 
             # Create subplot grid
@@ -483,7 +504,9 @@ class BurnerVisualization:
                 pollutants = list(emissions.keys())
                 concentrations = list(emissions.values())
                 ax7.bar(
-                    pollutants, concentrations, color=["brown", "gray", "purple", "orange"]
+                    pollutants,
+                    concentrations,
+                    color=["brown", "gray", "purple", "orange"],
                 )
                 ax7.set_title("Emise")
                 ax7.set_ylabel("Koncentrace [mg/m³]")
@@ -556,7 +579,9 @@ class BurnerVisualization:
 
             # Generate geometry visualization
             if "geometry" in calculation_results:
-                files = self.plot_burner_geometry(calculation_results["geometry"], save_formats)
+                files = self.plot_burner_geometry(
+                    calculation_results["geometry"], save_formats
+                )
                 all_saved_files["burner_geometry"] = list(files.values())
 
             # Generate summary dashboard

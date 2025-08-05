@@ -29,19 +29,19 @@ class TestRadiationCalculator(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.calculator = RadiationCalculator()
-        
+
         # Create mock combustion calculator
         self.mock_combustion = Mock(spec=CombustionCalculator)
-        
+
         # Mock constants
         self.mock_constants = {
             "stefan_boltzmann_constant": 5.67e-8  # W/(m²·K⁴)
         }
         self.mock_combustion.constants = self.mock_constants
-        
+
         # Sample parameters for testing
         self.flame_temperature = 2100.0  # K
-        self.wall_temperature = 1200.0   # K  
+        self.wall_temperature = 1200.0   # K
         self.chamber_diameter = 0.5      # m
         self.chamber_length = 1.5        # m
         self.fuel_type = "natural_gas"
@@ -60,15 +60,19 @@ class TestRadiationCalculator(unittest.TestCase):
 
     def test_load_material_data_default(self):
         """Test loading of default material data when file is not available."""
+        # Use correct path to data directory
+        data_path = os.path.join(os.path.dirname(__file__), "..", "data", "fuels.json")
         with patch('builtins.open', side_effect=FileNotFoundError):
-            calc = RadiationCalculator()
-            
+            combustion_calc = Mock(spec=CombustionCalculator)
+            combustion_calc.constants = {"stefan_boltzmann_constant": 5.67e-8}
+            calc = RadiationCalculator(combustion_calculator=combustion_calc)
+
             # Should have default material data
             self.assertIn("steel_oxidized", calc.material_data)
             self.assertIn("refractory_brick", calc.material_data)
             self.assertIn("flame_gases", calc.material_data)
             self.assertIn("soot_particles", calc.material_data)
-            
+
             # Check default values
             self.assertEqual(calc.material_data["steel_oxidized"]["emissivity"], 0.79)
             self.assertEqual(calc.material_data["refractory_brick"]["emissivity"], 0.75)
@@ -84,7 +88,7 @@ class TestRadiationCalculator(unittest.TestCase):
             excess_air_ratio=1.2,
             soot_concentration=0.0
         )
-        
+
         # Check result type and basic properties
         self.assertIsInstance(result, RadiationResults)
         self.assertGreater(result.total_radiation_heat_transfer, 0)
@@ -110,7 +114,7 @@ class TestRadiationCalculator(unittest.TestCase):
             fuel_type=self.fuel_type,
             soot_concentration=0.0
         )
-        
+
         result_with_soot = self.calculator.calculate_flame_radiation(
             flame_temperature=self.flame_temperature,
             chamber_wall_temperature=self.wall_temperature,
@@ -119,11 +123,11 @@ class TestRadiationCalculator(unittest.TestCase):
             fuel_type=self.fuel_type,
             soot_concentration=0.001  # kg/m³
         )
-        
+
         # Soot should increase flame emissivity and heat transfer
         self.assertGreater(result_with_soot.flame_emissivity, result_no_soot.flame_emissivity)
         self.assertGreater(
-            result_with_soot.flame_to_wall_heat_transfer, 
+            result_with_soot.flame_to_wall_heat_transfer,
             result_no_soot.flame_to_wall_heat_transfer
         )
 
@@ -131,7 +135,7 @@ class TestRadiationCalculator(unittest.TestCase):
         """Test flame radiation with different fuel types."""
         fuels = ["natural_gas", "propane", "methane"]
         results = []
-        
+
         for fuel in fuels:
             result = self.calculator.calculate_flame_radiation(
                 flame_temperature=self.flame_temperature,
@@ -143,7 +147,7 @@ class TestRadiationCalculator(unittest.TestCase):
                 soot_concentration=0.0
             )
             results.append(result)
-        
+
         # All should produce valid results
         for result in results:
             self.assertGreater(result.total_radiation_heat_transfer, 0)
@@ -173,7 +177,7 @@ class TestRadiationCalculator(unittest.TestCase):
                 fuel_type=self.fuel_type
             )
         self.assertIn("kladné", str(context.exception))
-        
+
         # Negative length
         with self.assertRaises(ValueError):
             self.calculator.calculate_flame_radiation(
@@ -190,12 +194,12 @@ class TestRadiationCalculator(unittest.TestCase):
             diameter=self.chamber_diameter,
             length=self.chamber_length
         )
-        
+
         self.assertGreater(beam_length, 0)
-        
+
         # Should be reasonable relative to chamber dimensions
         self.assertLess(beam_length, max(self.chamber_diameter, self.chamber_length))
-        
+
         # Test scaling with dimensions
         beam_length_large = self.calculator._calculate_mean_beam_length(
             diameter=self.chamber_diameter * 2,
@@ -206,7 +210,7 @@ class TestRadiationCalculator(unittest.TestCase):
     def test_calculate_flame_emissivity(self):
         """Test flame emissivity calculation."""
         beam_length = 0.5  # m
-        
+
         emissivity = self.calculator._calculate_flame_emissivity(
             temperature=self.flame_temperature,
             beam_length=beam_length,
@@ -214,16 +218,16 @@ class TestRadiationCalculator(unittest.TestCase):
             excess_air_ratio=1.2,
             soot_concentration=0.0
         )
-        
+
         # Should be between 0 and 1
         self.assertGreater(emissivity, 0)
         self.assertLess(emissivity, 1.0)
-        
+
         # Test different excess air ratios
         emissivity_lean = self.calculator._calculate_flame_emissivity(
             self.flame_temperature, beam_length, "natural_gas", 2.0, 0.0
         )
-        
+
         # Leaner mixture should have lower emissivity
         self.assertLess(emissivity_lean, emissivity)
 
@@ -232,7 +236,7 @@ class TestRadiationCalculator(unittest.TestCase):
         # Test known material
         steel_emissivity = self.calculator._get_wall_emissivity("steel_oxidized")
         self.assertEqual(steel_emissivity, 0.79)
-        
+
         # Test unknown material (should return default)
         unknown_emissivity = self.calculator._get_wall_emissivity("unknown_material")
         self.assertEqual(unknown_emissivity, 0.8)
@@ -243,12 +247,12 @@ class TestRadiationCalculator(unittest.TestCase):
         view_factor_short = self.calculator._calculate_view_factor_cylinder(1.0, 0.3)  # L/D = 0.3
         view_factor_medium = self.calculator._calculate_view_factor_cylinder(1.0, 2.0)  # L/D = 2.0
         view_factor_long = self.calculator._calculate_view_factor_cylinder(1.0, 8.0)   # L/D = 8.0
-        
+
         # All should be between 0 and 1
         for vf in [view_factor_short, view_factor_medium, view_factor_long]:
             self.assertGreater(vf, 0)
             self.assertLess(vf, 1.0)
-        
+
         # Long cylinders should have higher view factors
         self.assertLess(view_factor_short, view_factor_medium)
         self.assertLess(view_factor_medium, view_factor_long)
@@ -257,7 +261,7 @@ class TestRadiationCalculator(unittest.TestCase):
         """Test flame to wall radiation calculation."""
         flame_volume = math.pi * (self.chamber_diameter / 2) ** 2 * self.chamber_length
         wall_area = math.pi * self.chamber_diameter * self.chamber_length
-        
+
         heat_transfer = self.calculator._calculate_flame_to_wall_radiation(
             flame_volume=flame_volume,
             wall_area=wall_area,
@@ -267,15 +271,15 @@ class TestRadiationCalculator(unittest.TestCase):
             wall_emissivity=0.8,
             view_factor=0.8
         )
-        
+
         self.assertGreater(heat_transfer, 0)
-        
+
         # Test temperature scaling (should scale with T⁴ difference)
         heat_transfer_high_temp = self.calculator._calculate_flame_to_wall_radiation(
             flame_volume, wall_area, self.flame_temperature + 200, self.wall_temperature,
             0.3, 0.8, 0.8
         )
-        
+
         self.assertGreater(heat_transfer_high_temp, heat_transfer)
 
     def test_calculate_surface_radiation(self):
@@ -283,7 +287,7 @@ class TestRadiationCalculator(unittest.TestCase):
         area = 1.0  # m²
         surface_temp = 1200.0  # K
         ambient_temp = 293.15  # K
-        
+
         heat_transfer = self.calculator._calculate_surface_radiation(
             area=area,
             surface_temperature=surface_temp,
@@ -291,44 +295,44 @@ class TestRadiationCalculator(unittest.TestCase):
             surface_emissivity=0.8,
             ambient_absorptivity=0.9
         )
-        
+
         self.assertGreater(heat_transfer, 0)
-        
+
         # Test temperature scaling
         heat_transfer_high = self.calculator._calculate_surface_radiation(
             area, surface_temp + 200, ambient_temp, 0.8, 0.9
         )
-        
+
         self.assertGreater(heat_transfer_high, heat_transfer)
-        
+
         # Test area scaling
         heat_transfer_double_area = self.calculator._calculate_surface_radiation(
             area * 2, surface_temp, ambient_temp, 0.8, 0.9
         )
-        
+
         self.assertAlmostEqual(heat_transfer_double_area, heat_transfer * 2, places=1)
 
     def test_calculate_outer_surface_area(self):
         """Test outer surface area calculation."""
         inner_diameter = 0.5  # m
         length = 1.5         # m
-        wall_thickness = 0.1 # m
-        
+        wall_thickness = 0.1  # m
+
         outer_area = self.calculator._calculate_outer_surface_area(
             inner_diameter, length, wall_thickness
         )
-        
+
         self.assertGreater(outer_area, 0)
-        
+
         # Should be larger than inner surface area
         inner_area = math.pi * inner_diameter * length + 2 * math.pi * (inner_diameter / 2) ** 2
         self.assertGreater(outer_area, inner_area)
-        
+
         # Test thickness scaling
         outer_area_thick = self.calculator._calculate_outer_surface_area(
             inner_diameter, length, wall_thickness * 2
         )
-        
+
         self.assertGreater(outer_area_thick, outer_area)
 
     def test_calculate_radiation_exchange_network(self):
@@ -339,27 +343,27 @@ class TestRadiationCalculator(unittest.TestCase):
             SurfaceProperties(area=2.0, temperature=1200.0, emissivity=0.7, absorptivity=0.7),
             SurfaceProperties(area=1.5, temperature=800.0, emissivity=0.9, absorptivity=0.9)
         ]
-        
+
         # Create view factor matrix
         view_factors = [
             [0.0, 0.3, 0.2],
             [0.15, 0.0, 0.4],
             [0.1, 0.5, 0.0]
         ]
-        
+
         heat_transfers = self.calculator.calculate_radiation_exchange_network(
             surfaces, view_factors
         )
-        
+
         # Check that results are generated
         self.assertIsInstance(heat_transfers, dict)
         self.assertGreater(len(heat_transfers), 0)
-        
+
         # Check specific heat transfer keys
         self.assertIn("surface_0_to_surface_1", heat_transfers)
         self.assertIn("surface_0_to_surface_2", heat_transfers)
         self.assertIn("surface_1_to_surface_2", heat_transfers)
-        
+
         # All heat transfers should be finite numbers
         for key, value in heat_transfers.items():
             self.assertIsInstance(value, (int, float))
@@ -372,13 +376,13 @@ class TestRadiationCalculator(unittest.TestCase):
             SurfaceProperties(area=1.0, temperature=1500.0, emissivity=0.8, absorptivity=0.8),
             SurfaceProperties(area=2.0, temperature=1200.0, emissivity=0.7, absorptivity=0.7)
         ]
-        
+
         # Wrong size matrix
         view_factors = [
             [0.0, 0.3, 0.2],  # 3 elements instead of 2
             [0.15, 0.0]       # 2 elements
         ]
-        
+
         with self.assertRaises(ValueError) as context:
             self.calculator.calculate_radiation_exchange_network(surfaces, view_factors)
         self.assertIn("čtvercová", str(context.exception))
@@ -388,11 +392,11 @@ class TestRadiationCalculator(unittest.TestCase):
         # Test known material
         steel_emissivity = self.calculator.get_material_emissivity("steel_oxidized")
         self.assertEqual(steel_emissivity, 0.79)
-        
+
         # Test with temperature
         steel_emissivity_temp = self.calculator.get_material_emissivity("steel_oxidized", 1200.0)
         self.assertEqual(steel_emissivity_temp, 0.79)
-        
+
         # Test unknown material
         unknown_emissivity = self.calculator.get_material_emissivity("unknown_material")
         self.assertEqual(unknown_emissivity, 0.8)
@@ -405,7 +409,7 @@ class TestRadiationCalculator(unittest.TestCase):
             emissivity=0.8,
             absorptivity=0.75
         )
-        
+
         self.assertEqual(surface.area, 1.5)
         self.assertEqual(surface.temperature, 1200.0)
         self.assertEqual(surface.emissivity, 0.8)
@@ -424,7 +428,7 @@ class TestRadiationCalculator(unittest.TestCase):
             radiation_efficiency=75.0,
             mean_beam_length=0.6
         )
-        
+
         # Test all attributes are accessible
         self.assertEqual(results.total_radiation_heat_transfer, 50000.0)
         self.assertEqual(results.flame_to_wall_heat_transfer, 45000.0)
@@ -445,7 +449,7 @@ class TestRadiationCalculator(unittest.TestCase):
             chamber_length=self.chamber_length,
             fuel_type=self.fuel_type
         )
-        
+
         high_temp_result = self.calculator.calculate_flame_radiation(
             flame_temperature=2400.0,  # Higher flame temperature
             chamber_wall_temperature=1200.0,
@@ -453,7 +457,7 @@ class TestRadiationCalculator(unittest.TestCase):
             chamber_length=self.chamber_length,
             fuel_type=self.fuel_type
         )
-        
+
         # Higher temperature should increase heat transfer
         self.assertGreater(
             high_temp_result.flame_to_wall_heat_transfer,
@@ -469,7 +473,7 @@ class TestRadiationCalculator(unittest.TestCase):
             chamber_length=0.9,
             fuel_type=self.fuel_type
         )
-        
+
         large_result = self.calculator.calculate_flame_radiation(
             flame_temperature=self.flame_temperature,
             chamber_wall_temperature=self.wall_temperature,
@@ -477,7 +481,7 @@ class TestRadiationCalculator(unittest.TestCase):
             chamber_length=2.4,
             fuel_type=self.fuel_type
         )
-        
+
         # Larger chamber should generally have higher total heat transfer
         self.assertGreater(
             large_result.flame_to_wall_heat_transfer,
@@ -494,7 +498,7 @@ class TestRadiationCalculator(unittest.TestCase):
             fuel_type=self.fuel_type,
             excess_air_ratio=2.0  # Very lean
         )
-        
+
         rich_result = self.calculator.calculate_flame_radiation(
             flame_temperature=self.flame_temperature,
             chamber_wall_temperature=self.wall_temperature,
@@ -503,7 +507,7 @@ class TestRadiationCalculator(unittest.TestCase):
             fuel_type=self.fuel_type,
             excess_air_ratio=1.1  # Slightly lean
         )
-        
+
         # Rich mixture should have higher emissivity due to higher product concentrations
         self.assertGreater(rich_result.flame_emissivity, lean_result.flame_emissivity)
 
@@ -511,7 +515,7 @@ class TestRadiationCalculator(unittest.TestCase):
         """Test that physical constants are reasonable."""
         # Stefan-Boltzmann constant should be approximately 5.67e-8
         self.assertAlmostEqual(self.calculator.stefan_boltzmann, 5.67e-8, places=10)
-        
+
         # Absorption coefficients should be positive
         self.assertGreater(self.calculator.CO2_ABSORPTION_COEFF, 0)
         self.assertGreater(self.calculator.H2O_ABSORPTION_COEFF, 0)
@@ -526,7 +530,7 @@ class TestRadiationCalculator(unittest.TestCase):
             chamber_length=self.chamber_length,
             fuel_type=self.fuel_type
         )
-        
+
         # Should still produce valid results, but very low heat transfer
         self.assertGreater(result.flame_to_wall_heat_transfer, 0)
         self.assertLess(result.flame_to_wall_heat_transfer, 1000)  # Should be small
@@ -540,7 +544,7 @@ class TestRadiationCalculator(unittest.TestCase):
             chamber_length=self.chamber_length,
             fuel_type=self.fuel_type
         )
-        
+
         # Should still produce valid results
         self.assertGreater(result.flame_to_wall_heat_transfer, 0)
         self.assertLess(result.flame_emissivity, 1.0)  # Should not exceed 1

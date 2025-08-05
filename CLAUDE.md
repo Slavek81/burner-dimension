@@ -78,6 +78,11 @@ burner_calc/
 - Dodržujte PEP 8 naming conventions
 - Maximální délka řádku: 88 znaků
 - Používejte dataclasses pro datové struktury
+- Pokud je to vhodné, proveď refaktoring
+- Testu kód pomocí pytest s alespoň 80% pokrytím
+- Zpracovávej výjimky specificky, ne "except Exception"
+- Implementuj logování místo "print()" pro debugování - uživatel musí mít možnost debugování vypnout (separátně pro výpis na obrazovku a výpis do souboru), po každém spuštění by se měl log soubor přemazat, uživatel musí mít možnost nastavit počet záloh (defaultně 3)
+- Kód v angličtině, výstupy ve hře v češtině (např. "Skóre", "Prohra", "Zkus znovu")
 - Kód v angličtině, výstupy v češtině
 - Výpočetní funkce musí být odděleny od GUI, aplikace musí být spustitelná i bez GUI
 - Testy, dokumentace a výpočty budou v samostatných modulech

@@ -60,7 +60,10 @@ class BurnerReportGenerator:
         os.makedirs(output_dir, exist_ok=True)
 
     def set_metadata(
-        self, project_name: str = None, user_name: str = None, software_version: str = "1.0.0"
+        self,
+        project_name: str = None,
+        user_name: str = None,
+        software_version: str = "1.0.0",
     ) -> None:
         """
         Set metadata for the current calculation report.
@@ -113,9 +116,13 @@ class BurnerReportGenerator:
                     f.write("-" * 40 + "\n")
                     f.write(f"ID výpočtu: {self.report_metadata.calculation_id}\n")
                     f.write(f"Datum a čas: {self.report_metadata.timestamp}\n")
-                    f.write(f"Verze software: {self.report_metadata.software_version}\n")
+                    f.write(
+                        f"Verze software: {self.report_metadata.software_version}\n"
+                    )
                     if self.report_metadata.project_name:
-                        f.write(f"Název projektu: {self.report_metadata.project_name}\n")
+                        f.write(
+                            f"Název projektu: {self.report_metadata.project_name}\n"
+                        )
                     if self.report_metadata.user_name:
                         f.write(f"Uživatel: {self.report_metadata.user_name}\n")
                     f.write("\n")
@@ -142,9 +149,15 @@ class BurnerReportGenerator:
                     f.write(
                         f"Skutečné množství vzduchu: {combustion.get('actual_air', 'N/A')} m³/m³\n"
                     )
-                    f.write(f"Přebytek vzduchu: {combustion.get('excess_air', 'N/A')} %\n")
-                    f.write(f"Výhřevnost paliva: {combustion.get('heating_value', 'N/A')} MJ/m³\n")
-                    f.write(f"Teplota spalování: {combustion.get('combustion_temp', 'N/A')} °C\n")
+                    f.write(
+                        f"Přebytek vzduchu: {combustion.get('excess_air', 'N/A')} %\n"
+                    )
+                    f.write(
+                        f"Výhřevnost paliva: {combustion.get('heating_value', 'N/A')} MJ/m³\n"
+                    )
+                    f.write(
+                        f"Teplota spalování: {combustion.get('combustion_temp', 'N/A')} °C\n"
+                    )
 
                     if "products" in combustion:
                         f.write("\nSložení spalin:\n")
@@ -160,8 +173,12 @@ class BurnerReportGenerator:
 
                     f.write(f"Typ hořáku: {burner.get('type', 'N/A')}\n")
                     f.write(f"Výkon hořáku: {burner.get('power', 'N/A')} kW\n")
-                    f.write(f"Průměr trysky: {burner.get('nozzle_diameter', 'N/A')} mm\n")
-                    f.write(f"Rychlost plynu: {burner.get('gas_velocity', 'N/A')} m/s\n")
+                    f.write(
+                        f"Průměr trysky: {burner.get('nozzle_diameter', 'N/A')} mm\n"
+                    )
+                    f.write(
+                        f"Rychlost plynu: {burner.get('gas_velocity', 'N/A')} m/s\n"
+                    )
                     f.write(f"Tlak plynu: {burner.get('gas_pressure', 'N/A')} Pa\n")
                     f.write("\n")
 
@@ -175,7 +192,9 @@ class BurnerReportGenerator:
                     f.write(f"Délka komory: {chamber.get('length', 'N/A')} m\n")
                     f.write(f"Průměr komory: {chamber.get('diameter', 'N/A')} m\n")
                     f.write(f"Doba zdržení: {chamber.get('residence_time', 'N/A')} s\n")
-                    f.write(f"Tepelné zatížení: {chamber.get('heat_loading', 'N/A')} kW/m³\n")
+                    f.write(
+                        f"Tepelné zatížení: {chamber.get('heat_loading', 'N/A')} kW/m³\n"
+                    )
                     f.write("\n")
 
                 # Write radiation analysis
@@ -184,10 +203,18 @@ class BurnerReportGenerator:
                     f.write("-" * 40 + "\n")
                     radiation = calculation_results["radiation"]
 
-                    f.write(f"Radiační tepelný tok: {radiation.get('heat_flux', 'N/A')} kW/m²\n")
-                    f.write(f"Emisivita plynů: {radiation.get('gas_emissivity', 'N/A')}\n")
-                    f.write(f"Emisivita stěn: {radiation.get('wall_emissivity', 'N/A')}\n")
-                    f.write(f"Účinnost radiace: {radiation.get('radiation_efficiency', 'N/A')} %\n")
+                    f.write(
+                        f"Radiační tepelný tok: {radiation.get('heat_flux', 'N/A')} kW/m²\n"
+                    )
+                    f.write(
+                        f"Emisivita plynů: {radiation.get('gas_emissivity', 'N/A')}\n"
+                    )
+                    f.write(
+                        f"Emisivita stěn: {radiation.get('wall_emissivity', 'N/A')}\n"
+                    )
+                    f.write(
+                        f"Účinnost radiace: {radiation.get('radiation_efficiency', 'N/A')} %\n"
+                    )
                     f.write("\n")
 
                 # Write pressure losses
@@ -209,10 +236,14 @@ class BurnerReportGenerator:
                 f.write("SHRNUTÍ VÝKONU\n")
                 f.write("-" * 40 + "\n")
                 if "efficiency" in calculation_results:
-                    f.write(f"Celková účinnost: {calculation_results['efficiency']:.1f} %\n")
+                    f.write(
+                        f"Celková účinnost: {calculation_results['efficiency']:.1f} %\n"
+                    )
                 if "emissions" in calculation_results:
                     f.write("Emise:\n")
-                    for pollutant, concentration in calculation_results["emissions"].items():
+                    for pollutant, concentration in calculation_results[
+                        "emissions"
+                    ].items():
                         f.write(f"  {pollutant}: {concentration:.1f} mg/m³\n")
 
                 # Write recommendations
@@ -236,7 +267,9 @@ class BurnerReportGenerator:
             print(f"Chyba při vytváření textové zprávy: {e}")
             return ""
 
-    def generate_csv_export(self, calculation_results: Dict, filename: Optional[str] = None) -> str:
+    def generate_csv_export(
+        self, calculation_results: Dict, filename: Optional[str] = None
+    ) -> str:
         """
         Generate CSV export of calculation results.
 
@@ -285,11 +318,23 @@ class BurnerReportGenerator:
                 # Write metadata
                 if self.report_metadata:
                     writer.writerow(
-                        ["calculation_id", self.report_metadata.calculation_id, "-", "metadata"]
+                        [
+                            "calculation_id",
+                            self.report_metadata.calculation_id,
+                            "-",
+                            "metadata",
+                        ]
                     )
-                    writer.writerow(["timestamp", self.report_metadata.timestamp, "-", "metadata"])
                     writer.writerow(
-                        ["software_version", self.report_metadata.software_version, "-", "metadata"]
+                        ["timestamp", self.report_metadata.timestamp, "-", "metadata"]
+                    )
+                    writer.writerow(
+                        [
+                            "software_version",
+                            self.report_metadata.software_version,
+                            "-",
+                            "metadata",
+                        ]
                     )
 
                 # Write flattened results
@@ -341,7 +386,10 @@ class BurnerReportGenerator:
                     burner = calculation_results["burner"]
                     summary_data["Parametr"].extend(["Výkon hořáku", "Průměr trysky"])
                     summary_data["Hodnota"].extend(
-                        [burner.get("power", "N/A"), burner.get("nozzle_diameter", "N/A")]
+                        [
+                            burner.get("power", "N/A"),
+                            burner.get("nozzle_diameter", "N/A"),
+                        ]
                     )
                     summary_data["Jednotka"].extend(["kW", "mm"])
 
@@ -349,7 +397,10 @@ class BurnerReportGenerator:
                     chamber = calculation_results["chamber"]
                     summary_data["Parametr"].extend(["Objem komory", "Doba zdržení"])
                     summary_data["Hodnota"].extend(
-                        [chamber.get("volume", "N/A"), chamber.get("residence_time", "N/A")]
+                        [
+                            chamber.get("volume", "N/A"),
+                            chamber.get("residence_time", "N/A"),
+                        ]
                     )
                     summary_data["Jednotka"].extend(["m³", "s"])
 
@@ -363,7 +414,9 @@ class BurnerReportGenerator:
                         "Hodnota": list(calculation_results["inputs"].values()),
                     }
                     inputs_df = pd.DataFrame(inputs_data)
-                    inputs_df.to_excel(writer, sheet_name="Vstupní parametry", index=False)
+                    inputs_df.to_excel(
+                        writer, sheet_name="Vstupní parametry", index=False
+                    )
 
                 # Sheet 3: Combustion Analysis
                 if "combustion" in calculation_results:
@@ -416,9 +469,12 @@ class BurnerReportGenerator:
                 ):
                     pressure_data = calculation_results["pressure_losses"]["components"]
                     pressure_df = pd.DataFrame(
-                        list(pressure_data.items()), columns=["Komponenta", "Tlaková ztráta [Pa]"]
+                        list(pressure_data.items()),
+                        columns=["Komponenta", "Tlaková ztráta [Pa]"],
                     )
-                    pressure_df.to_excel(writer, sheet_name="Tlakové ztráty", index=False)
+                    pressure_df.to_excel(
+                        writer, sheet_name="Tlakové ztráty", index=False
+                    )
 
                 # Sheet 6: Metadata
                 if self.report_metadata:

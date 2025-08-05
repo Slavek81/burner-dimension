@@ -101,7 +101,9 @@ class PressureLossCalculator:
     """
 
     def __init__(
-        self, combustion_calculator: CombustionCalculator = None, safety_factor: float = 1.3
+        self,
+        combustion_calculator: CombustionCalculator = None,
+        safety_factor: float = 1.3,
     ):
         """
         Initialize the pressure loss calculator.
@@ -203,11 +205,15 @@ class PressureLossCalculator:
         # Calculate minor losses from fittings
         total_minor_loss = 0.0
         for fitting in fittings:
-            minor_loss = self._calculate_fitting_loss(fitting, mass_flow_rate, gas_density)
+            minor_loss = self._calculate_fitting_loss(
+                fitting, mass_flow_rate, gas_density
+            )
             total_minor_loss += minor_loss
 
         # Calculate elevation losses
-        total_elevation_loss = self._calculate_elevation_losses(pipe_segments, gas_density)
+        total_elevation_loss = self._calculate_elevation_losses(
+            pipe_segments, gas_density
+        )
 
         # Include burner pressure loss if provided
         burner_pressure_loss = 0.0
@@ -216,7 +222,10 @@ class PressureLossCalculator:
 
         # Calculate total system pressure loss
         total_pressure_loss = (
-            total_friction_loss + total_minor_loss + total_elevation_loss + burner_pressure_loss
+            total_friction_loss
+            + total_minor_loss
+            + total_elevation_loss
+            + burner_pressure_loss
         )
 
         # Calculate required supply pressure with safety factor
@@ -242,7 +251,11 @@ class PressureLossCalculator:
         )
 
     def _calculate_pipe_friction_loss(
-        self, segment: PipeSegment, mass_flow_rate: float, gas_density: float, gas_viscosity: float
+        self,
+        segment: PipeSegment,
+        mass_flow_rate: float,
+        gas_density: float,
+        gas_viscosity: float,
     ) -> Tuple[float, float, float, float]:
         """
         Calculate friction loss in a single pipe segment.
@@ -273,7 +286,9 @@ class PressureLossCalculator:
         velocity_pressure = 0.5 * gas_density * velocity**2
 
         # Calculate friction loss using Darcy-Weisbach equation
-        friction_loss = friction_factor * (segment.length / segment.diameter) * velocity_pressure
+        friction_loss = (
+            friction_factor * (segment.length / segment.diameter) * velocity_pressure
+        )
 
         return friction_loss, reynolds, friction_factor, velocity_pressure
 
@@ -300,7 +315,9 @@ class PressureLossCalculator:
             # Transition region - linear interpolation
             f_laminar = 64 / 2300
             f_turbulent = self._colebrook_white(4000, relative_roughness)
-            return f_laminar + (f_turbulent - f_laminar) * (reynolds - 2300) / (4000 - 2300)
+            return f_laminar + (f_turbulent - f_laminar) * (reynolds - 2300) / (
+                4000 - 2300
+            )
         else:
             # Turbulent flow - Colebrook-White equation
             return self._colebrook_white(reynolds, relative_roughness)
@@ -322,7 +339,10 @@ class PressureLossCalculator:
         # Iterative solution
         for _ in range(10):  # Maximum 10 iterations
             f_new = (
-                -2 * math.log10(relative_roughness / 3.7 + 2.51 / (reynolds * math.sqrt(f)))
+                -2
+                * math.log10(
+                    relative_roughness / 3.7 + 2.51 / (reynolds * math.sqrt(f))
+                )
             ) ** (-2)
 
             if abs(f_new - f) < 1e-6:
@@ -370,11 +390,15 @@ class PressureLossCalculator:
         Returns:
             float: Elevation pressure loss [Pa]
         """
-        total_elevation_change = sum(segment.elevation_change for segment in pipe_segments)
+        total_elevation_change = sum(
+            segment.elevation_change for segment in pipe_segments
+        )
 
         # Hydrostatic pressure change: ΔP = ρ * g * Δh
         gravitational_acceleration = 9.81  # m/s²
-        elevation_loss = gas_density * gravitational_acceleration * total_elevation_change
+        elevation_loss = (
+            gas_density * gravitational_acceleration * total_elevation_change
+        )
 
         return elevation_loss
 
@@ -400,9 +424,13 @@ class PressureLossCalculator:
         Returns:
             float: Loss coefficient K [-]
         """
-        return self.FITTING_COEFFICIENTS.get(fitting_type, 1.0)  # Default conservative value
+        return self.FITTING_COEFFICIENTS.get(
+            fitting_type, 1.0
+        )  # Default conservative value
 
-    def calculate_equivalent_length(self, fittings: List[Fitting], pipe_diameter: float) -> float:
+    def calculate_equivalent_length(
+        self, fittings: List[Fitting], pipe_diameter: float
+    ) -> float:
         """
         Calculate equivalent length of fittings for simplified calculations.
 
@@ -481,7 +509,9 @@ class PressureLossCalculator:
 
             # Calculate pressure loss
             pressure_loss, reynolds, friction_factor, velocity_pressure = (
-                self._calculate_pipe_friction_loss(segment, mass_flow_rate, gas_density, 1.5e-5)
+                self._calculate_pipe_friction_loss(
+                    segment, mass_flow_rate, gas_density, 1.5e-5
+                )
             )
 
             # Check if pressure loss is acceptable
@@ -500,7 +530,8 @@ class PressureLossCalculator:
             # No suitable diameter found
             return {
                 "diameter": max(diameters),
-                "velocity": mass_flow_rate / (gas_density * math.pi * max(diameters) ** 2 / 4),
+                "velocity": mass_flow_rate
+                / (gas_density * math.pi * max(diameters) ** 2 / 4),
                 "pressure_loss": float("inf"),
                 "reynolds_number": 0,
                 "friction_factor": 0,
@@ -565,10 +596,24 @@ def main():
                 calc.get_fitting_coefficient("pipe_entrance_rounded"),
                 0.05,
             ),
-            Fitting("elbow_90_long", 3, calc.get_fitting_coefficient("elbow_90_long"), 0.05),
-            Fitting("tee_through", 1, calc.get_fitting_coefficient("tee_through"), 0.05),
-            Fitting("gate_valve_open", 1, calc.get_fitting_coefficient("gate_valve_open"), 0.05),
-            Fitting("reducer_gradual", 1, calc.get_fitting_coefficient("reducer_gradual"), 0.025),
+            Fitting(
+                "elbow_90_long", 3, calc.get_fitting_coefficient("elbow_90_long"), 0.05
+            ),
+            Fitting(
+                "tee_through", 1, calc.get_fitting_coefficient("tee_through"), 0.05
+            ),
+            Fitting(
+                "gate_valve_open",
+                1,
+                calc.get_fitting_coefficient("gate_valve_open"),
+                0.05,
+            ),
+            Fitting(
+                "reducer_gradual",
+                1,
+                calc.get_fitting_coefficient("reducer_gradual"),
+                0.025,
+            ),
             Fitting("pipe_exit", 1, calc.get_fitting_coefficient("pipe_exit"), 0.025),
         ]
 

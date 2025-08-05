@@ -56,7 +56,10 @@ class BurnerDesigner:
     """
 
     def __init__(
-        self, combustion_calculator: CombustionCalculator = None, safety_factor: float = 1.2
+        self,
+        combustion_calculator: CombustionCalculator = None,
+        safety_factor: float = 1.2,
+        fuel_data_path: str = None,
     ):
         """
         Initialize the burner designer.
@@ -64,8 +67,11 @@ class BurnerDesigner:
         Args:
             combustion_calculator (CombustionCalculator, optional): Combustion calculator instance
             safety_factor (float): Safety factor for design calculations
+            fuel_data_path (str, optional): Path to fuel data file
         """
-        self.combustion_calc = combustion_calculator or CombustionCalculator()
+        self.combustion_calc = combustion_calculator or CombustionCalculator(
+            fuel_data_path=fuel_data_path
+        )
         self.safety_factor = safety_factor
 
         # Design constants
@@ -118,11 +124,14 @@ class BurnerDesigner:
         )
 
         # Calculate gas density at operating conditions
-        gas_density = self._calculate_gas_density(fuel_type, supply_pressure, 293.15)  # 20°C
+        # Calculate gas density at 20°C
+        gas_density = self._calculate_gas_density(fuel_type, supply_pressure, 293.15)
 
         # Calculate burner dimensions
         if target_velocity is None:
-            target_velocity = self._calculate_optimal_velocity(fuel_type, required_power)
+            target_velocity = self._calculate_optimal_velocity(
+                fuel_type, required_power
+            )
 
         # Validate velocity range
         if target_velocity < self.MIN_GAS_VELOCITY:
@@ -145,7 +154,8 @@ class BurnerDesigner:
 
         if required_supply_pressure > supply_pressure:
             raise ValueError(
-                f"Nedostatečný tlak plynu. Požadováno: {required_supply_pressure:.0f} Pa, "
+                f"Nedostatečný tlak plynu. "
+                f"Požadováno: {required_supply_pressure:.0f} Pa, "
                 f"k dispozici: {supply_pressure:.0f} Pa"
             )
 
@@ -154,7 +164,8 @@ class BurnerDesigner:
 
         if heat_release_density > self.MAX_HEAT_DENSITY:
             raise ValueError(
-                f"Příliš vysoká hustota tepelného toku: {heat_release_density/1e6:.1f} MW/m². "
+                f"Příliš vysoká hustota tepelného toku: "
+                f"{heat_release_density/1e6:.1f} MW/m². "
                 f"Maximum: {self.MAX_HEAT_DENSITY/1e6:.1f} MW/m²"
             )
 
@@ -162,7 +173,9 @@ class BurnerDesigner:
         burner_length = burner_diameter * 3.0
 
         # Estimate flame length
-        flame_length = self._calculate_flame_length(burner_diameter, target_velocity, fuel_type)
+        flame_length = self._calculate_flame_length(
+            burner_diameter, target_velocity, fuel_type
+        )
 
         return BurnerDesignResults(
             burner_diameter=burner_diameter,
@@ -175,7 +188,9 @@ class BurnerDesigner:
             flame_length=flame_length,
         )
 
-    def _calculate_gas_density(self, fuel_type: str, pressure: float, temperature: float) -> float:
+    def _calculate_gas_density(
+        self, fuel_type: str, pressure: float, temperature: float
+    ) -> float:
         """
         Calculate gas density at given conditions.
 
@@ -191,7 +206,8 @@ class BurnerDesigner:
         constants = self.combustion_calc.constants
 
         # Using ideal gas law: ρ = (P * M) / (R * T)
-        molecular_weight = fuel_props["molecular_weight"] / 1000  # Convert g/mol to kg/mol
+        # Convert g/mol to kg/mol
+        molecular_weight = fuel_props["molecular_weight"] / 1000
         gas_constant = constants["universal_gas_constant"]
 
         density = (pressure * molecular_weight) / (gas_constant * temperature)
@@ -302,7 +318,9 @@ class BurnerDesigner:
         """
         validation = {
             "velocity_in_range": (
-                self.MIN_GAS_VELOCITY <= design_results.gas_velocity <= self.MAX_GAS_VELOCITY
+                self.MIN_GAS_VELOCITY
+                <= design_results.gas_velocity
+                <= self.MAX_GAS_VELOCITY
             ),
             "heat_density_acceptable": (
                 design_results.heat_release_density <= self.MAX_HEAT_DENSITY
@@ -312,7 +330,8 @@ class BurnerDesigner:
                 and 0.01 <= design_results.burner_length <= 5.0
             ),
             "pressure_drop_reasonable": (
-                design_results.burner_pressure_drop < design_results.required_supply_pressure * 0.8
+                design_results.burner_pressure_drop
+                < design_results.required_supply_pressure * 0.8
             ),
         }
 
@@ -353,7 +372,9 @@ class BurnerDesigner:
             )
 
         if design_results.flame_length > design_results.burner_length * 10:
-            recommendations.append("Dlouhý plamen - zvažte úpravu geometrie spalovací komory")
+            recommendations.append(
+                "Dlouhý plamen - zvažte úpravu geometrie spalovací komory"
+            )
 
         return recommendations
 
@@ -372,7 +393,9 @@ def main():
         supply_pressure = 3000  # Pa (30 mbar)
 
         results = designer.design_burner(
-            fuel_type=fuel_type, required_power=required_power, supply_pressure=supply_pressure
+            fuel_type=fuel_type,
+            required_power=required_power,
+            supply_pressure=supply_pressure,
         )
 
         print(f"Návrh hořáku pro {fuel_type}:")

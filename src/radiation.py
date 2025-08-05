@@ -90,7 +90,9 @@ class RadiationCalculator:
         self.material_data = self._load_material_data()
 
         # Physical constants
-        self.stefan_boltzmann = self.combustion_calc.constants["stefan_boltzmann_constant"]
+        self.stefan_boltzmann = self.combustion_calc.constants[
+            "stefan_boltzmann_constant"
+        ]
 
         # Default gas radiation properties
         self.CO2_ABSORPTION_COEFF = 0.2  # m⁻¹·atm⁻¹ at typical conditions
@@ -152,11 +154,17 @@ class RadiationCalculator:
             raise ValueError("Rozměry komory musí být kladné")
 
         # Calculate mean beam length for cylindrical chamber
-        mean_beam_length = self._calculate_mean_beam_length(chamber_diameter, chamber_length)
+        mean_beam_length = self._calculate_mean_beam_length(
+            chamber_diameter, chamber_length
+        )
 
         # Calculate flame emissivity
         flame_emissivity = self._calculate_flame_emissivity(
-            flame_temperature, mean_beam_length, fuel_type, excess_air_ratio, soot_concentration
+            flame_temperature,
+            mean_beam_length,
+            fuel_type,
+            excess_air_ratio,
+            soot_concentration,
         )
 
         # Calculate flame absorptivity (Kirchhoff's law approximation)
@@ -204,7 +212,9 @@ class RadiationCalculator:
         # Calculate radiation efficiency
         # This represents how effectively thermal energy is transferred by radiation
         max_theoretical_radiation = (
-            self.stefan_boltzmann * wall_area * (flame_temperature**4 - chamber_wall_temperature**4)
+            self.stefan_boltzmann
+            * wall_area
+            * (flame_temperature**4 - chamber_wall_temperature**4)
         )
 
         radiation_efficiency = (
@@ -287,7 +297,9 @@ class RadiationCalculator:
         emissivity_h2o = 1 - math.exp(-self.H2O_ABSORPTION_COEFF * p_h2o * beam_length)
 
         # Combine CO2 and H2O emissivities (with interaction correction)
-        gas_emissivity = emissivity_co2 + emissivity_h2o - 0.15 * emissivity_co2 * emissivity_h2o
+        gas_emissivity = (
+            emissivity_co2 + emissivity_h2o - 0.15 * emissivity_co2 * emissivity_h2o
+        )
 
         # Add soot contribution if present
         if soot_concentration > 0:
@@ -372,11 +384,15 @@ class RadiationCalculator:
         # Q = σ * A_flame * F_flame_wall * ε_effective * (T_flame⁴ - T_wall⁴)
 
         # Effective area (flame volume converted to equivalent area)
-        effective_flame_area = flame_volume ** (2 / 3)  # Approximation for volume to area
+        effective_flame_area = flame_volume ** (
+            2 / 3
+        )  # Approximation for volume to area
 
         # Effective emissivity considering both surfaces
         emissivity_effective = 1 / (
-            1 / flame_emissivity + wall_area / (effective_flame_area * wall_emissivity) - 1
+            1 / flame_emissivity
+            + wall_area / (effective_flame_area * wall_emissivity)
+            - 1
         )
 
         # Heat transfer calculation
@@ -436,7 +452,9 @@ class RadiationCalculator:
             float: Outer surface area [m²]
         """
         outer_diameter = inner_diameter + 2 * wall_thickness
-        outer_area = math.pi * outer_diameter * length + 2 * math.pi * (outer_diameter / 2) ** 2
+        outer_area = (
+            math.pi * outer_diameter * length + 2 * math.pi * (outer_diameter / 2) ** 2
+        )
 
         return outer_area
 
@@ -455,8 +473,12 @@ class RadiationCalculator:
         """
         n = len(surfaces)
 
-        if len(view_factors_matrix) != n or any(len(row) != n for row in view_factors_matrix):
-            raise ValueError("Matice view faktorů musí být čtvercová a odpovídat počtu povrchů")
+        if len(view_factors_matrix) != n or any(
+            len(row) != n for row in view_factors_matrix
+        ):
+            raise ValueError(
+                "Matice view faktorů musí být čtvercová a odpovídat počtu povrchů"
+            )
 
         # Calculate radiation heat transfer between each pair
         heat_transfers = {}
@@ -489,7 +511,9 @@ class RadiationCalculator:
 
         return heat_transfers
 
-    def get_material_emissivity(self, material_name: str, temperature: float = None) -> float:
+    def get_material_emissivity(
+        self, material_name: str, temperature: float = None
+    ) -> float:
         """
         Get material emissivity, potentially temperature-dependent.
 
@@ -545,11 +569,19 @@ def main():
         print("Výpočet radiace pro spalovací komoru:")
         print(f"Teplota plamene: {flame_temperature-273.15:.0f} °C")
         print(f"Teplota stěny: {wall_temperature-273.15:.0f} °C")
-        print(f"Rozměry komory: ⌀{chamber_diameter*1000:.0f} × {chamber_length*1000:.0f} mm")
+        print(
+            f"Rozměry komory: ⌀{chamber_diameter*1000:.0f} × {chamber_length*1000:.0f} mm"
+        )
         print("\nVýsledky radiace:")
-        print(f"Celkový radiační přenos tepla: {results.total_radiation_heat_transfer/1000:.1f} kW")
-        print(f"Přenos z plamene na stěnu: {results.flame_to_wall_heat_transfer/1000:.1f} kW")
-        print(f"Přenos ze stěny do okolí: {results.wall_to_ambient_heat_transfer/1000:.1f} kW")
+        print(
+            f"Celkový radiační přenos tepla: {results.total_radiation_heat_transfer/1000:.1f} kW"
+        )
+        print(
+            f"Přenos z plamene na stěnu: {results.flame_to_wall_heat_transfer/1000:.1f} kW"
+        )
+        print(
+            f"Přenos ze stěny do okolí: {results.wall_to_ambient_heat_transfer/1000:.1f} kW"
+        )
         print(f"Emisivita plamene: {results.flame_emissivity:.3f}")
         print(f"Emisivita stěny: {results.wall_emissivity:.3f}")
         print(f"View faktor plamen-stěna: {results.view_factor_flame_wall:.3f}")
@@ -558,7 +590,12 @@ def main():
 
         # Test material emissivity lookup
         print("\nEmisivity materiálů:")
-        materials = ["steel_oxidized", "refractory_brick", "flame_gases", "soot_particles"]
+        materials = [
+            "steel_oxidized",
+            "refractory_brick",
+            "flame_gases",
+            "soot_particles",
+        ]
         for material in materials:
             emissivity = calc.get_material_emissivity(material, temperature=1200)
             print(f"{material}: {emissivity:.3f}")

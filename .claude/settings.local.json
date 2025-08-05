@@ -3,7 +3,6 @@
     "allow": [
       "Bash(find:*)",
       "Bash(python3:*)",
-      "Bash(python -m pytest test_calculator.py -v)",
       "Bash(mkdir:*)",
       "Bash(flake8:*)",
       "Bash(bandit:*)",
