@@ -539,10 +539,13 @@ class BurnerCalculatorGUI:
             # Radiation calculations
             self.root.after(0, self._update_status, "Výpočet radiace...")
             radiation_calc = self.calculators["radiation"]
-            radiation_results = radiation_calc.calculate_radiation_transfer(
-                combustion_results.adiabatic_flame_temperature,
-                chamber_results.chamber_wall_temperature,
-                chamber_results.chamber_volume,
+            radiation_results = radiation_calc.calculate_flame_radiation(
+                flame_temperature=combustion_results.adiabatic_flame_temperature,
+                chamber_wall_temperature=chamber_results.chamber_wall_temperature,
+                chamber_diameter=chamber_results.chamber_diameter,
+                chamber_length=chamber_results.chamber_length,
+                fuel_type=self.input_data["fuel_type"],
+                excess_air_ratio=combustion_results.excess_air_ratio,
             )
             self.results["radiation"] = radiation_results
 
