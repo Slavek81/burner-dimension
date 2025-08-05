@@ -20,7 +20,14 @@ from datetime import datetime
 import threading
 
 # Add src directory to path for imports
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), "src"))
+src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
+if os.path.exists(src_path):
+    sys.path.append(src_path)
+else:
+    # Try alternative path (if running from project root)
+    alt_src_path = os.path.join(os.getcwd(), "src")
+    if os.path.exists(alt_src_path):
+        sys.path.append(alt_src_path)
 
 try:
     from combustion import CombustionCalculator
@@ -30,7 +37,27 @@ try:
     from pressure_losses import PressureLossCalculator
     from visualization import BurnerVisualization
 except ImportError as e:
-    print(f"Error importing modules: {e}")
+    import tkinter as tk
+    from tkinter import messagebox
+    
+    # Create minimal root window for error dialog
+    error_root = tk.Tk()
+    error_root.withdraw()  # Hide the main window
+    
+    error_message = (
+        f"Chyba při načítání výpočetních modulů:\n\n{e}\n\n"
+        "Možné příčiny:\n"
+        "• Chybí výpočetní moduly v adresáři 'src/'\n"
+        "• Chybí závislosti (numpy, pandas, matplotlib)\n"
+        "• Nesprávná struktura adresářů\n\n"
+        "Řešení:\n"
+        "• Zkontrolujte, zda existuje adresář 'src/' s moduly\n"
+        "• Nainstalujte požadované závislosti: pip install numpy pandas matplotlib\n"
+        "• Spusťte aplikaci z hlavního adresáře projektu"
+    )
+    
+    messagebox.showerror("Chyba při spuštění aplikace", error_message)
+    error_root.destroy()
     sys.exit(1)
 
 
