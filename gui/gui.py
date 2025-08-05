@@ -696,7 +696,7 @@ class BurnerCalculatorGUI:
                 self._display_pressure_results()
 
             self._display_summary_results()
-            
+
             # Automatically switch to Results tab after calculation
             for i in range(self.notebook.index("end")):
                 tab_text = self.notebook.tab(i, "text")
@@ -784,9 +784,6 @@ class BurnerCalculatorGUI:
         text += "-" * 20 + "\n"
         text += f"Odhadovaná délka plamene: {results.flame_length*1000:.0f} mm\n"
         text += f"Poměr plamene k hořáku: {results.flame_length/results.burner_length:.1f} [-]\n\n"
-        )
-
-        text += f"Hustota tepelného toku: {results.heat_release_density/1000:.0f} kW/m²\n"
 
         self.burner_text.delete(1.0, tk.END)
         self.burner_text.insert(1.0, text)
@@ -808,7 +805,7 @@ class BurnerCalculatorGUI:
         text += f"Poměr L/D komory: {results.chamber_length/results.chamber_diameter:.1f} [-]\n\n"
 
         # Tepelné parametry
-        text += "TEPELNÉ PARAMETRY:\n"  
+        text += "TEPELNÉ PARAMETRY:\n"
         text += "-" * 21 + "\n"
         text += f"Doba zdržení spalin: {results.residence_time:.3f} s\n"
         text += f"Objemová hustota výkonu: {results.volume_heat_release_rate/1e6:.1f} MW/m³\n"
@@ -821,9 +818,6 @@ class BurnerCalculatorGUI:
         text += f"Rychlost ztrát tepla: {results.heat_loss_rate/1000:.1f} kW\n"
         text += f"Součinitel přestupu tepla: {results.heat_transfer_coefficient:.1f} W/m²·K\n"
         text += f"Podíl ztrát z celkového výkonu: {results.heat_loss_rate/(float(self.input_data['heat_output'])*1000)*100:.1f} %\n\n"
-
-        text += f"Hustota tepelného toku: {results.volume_heat_release_rate/1000:.0f} kW/m³\n"
-        text += f"Součinitel přestupu tepla: {results.heat_transfer_coefficient:.1f} W/(m²·K)\n"
 
         self.chamber_text.delete(1.0, tk.END)
         self.chamber_text.insert(1.0, text)
