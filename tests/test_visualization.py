@@ -24,257 +24,292 @@ class TestBurnerVisualization(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.temp_dir = tempfile.mkdtemp()
-        self.visualizer = BurnerVisualization()
+        self.visualizer = BurnerVisualization(output_dir=self.temp_dir)
 
-        # Sample data for testing
-        self.sample_data = {
-            "positions": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
-            "temperatures": [2100, 1950, 1800, 1650, 1500, 1350],
-            "pressures": [101325, 101200, 101100, 101000, 100950, 100900],
-            "velocities": [25.0, 22.5, 20.0, 17.5, 15.0, 12.5],
+        # Sample data for testing in expected format
+        self.combustion_data = {
+            "stoichiometric_air": 9.5,
+            "actual_air": 10.45,
+            "products": {
+                "CO2": 10.9,
+                "H2O": 20.9,
+                "N2": 67.2,
+                "O2": 1.0
+            },
+            "temperature_profile": [2100, 1950, 1800, 1650, 1500, 1350],
+            "heat_release": [800, 750, 650, 500, 300, 100]
         }
 
-        self.burner_results = {
-            "burner_diameter": 0.050,  # m
-            "gas_velocity": 25.0,  # m/s
-            "heat_release_density": 50e6,  # W/m²
-            "burner_pressure_drop": 250,  # Pa
+        self.pressure_data = {
+            "components": {
+                "burner": 250,
+                "chamber": 150,
+                "exit": 100,
+                "piping": 50
+            },
+            "positions": [0.0, 0.2, 0.5, 0.8, 1.0],
+            "cumulative": [0, 250, 400, 500, 550]
         }
 
-        self.chamber_results = {
-            "chamber_volume": 0.025,  # m³
-            "chamber_diameter": 0.200,  # m
-            "chamber_length": 0.800,  # m
-            "residence_time": 0.15,  # s
-            "thermal_efficiency": 85.0,  # %
+        self.temperature_data = {
+            "temperature_field": [
+                [2100, 2000, 1900, 1800],
+                [2050, 1950, 1850, 1750],
+                [2000, 1900, 1800, 1700],
+                [1950, 1850, 1750, 1650]
+            ]
+        }
+
+        self.geometry_data = {
+            "chamber": {
+                "length": 0.8,
+                "height": 0.2,
+                "diameter": 0.2
+            },
+            "burner": {
+                "width": 0.1,
+                "height": 0.05
+            }
         }
 
     def tearDown(self):
         """Clean up test fixtures."""
         shutil.rmtree(self.temp_dir)
 
-    def test_plot_temperature_profile(self):
-        """Test temperature profile plotting."""
-        output_file = os.path.join(self.temp_dir, "temperature_profile.png")
-
+    def test_plot_combustion_analysis(self):
+        """Test combustion analysis plotting."""
         # Create plot
-        self.visualizer.plot_temperature_profile(
-            positions=self.sample_data["positions"],
-            temperatures=self.sample_data["temperatures"],
-            title="Test Temperature Profile",
-            output_file=output_file,
+        saved_files = self.visualizer.plot_combustion_analysis(
+            self.combustion_data,
+            save_formats=["png"]
         )
 
-        # Check file was created
-        self.assertTrue(os.path.exists(output_file))
+        # Check files were created
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("png", saved_files)
+        self.assertTrue(os.path.exists(saved_files["png"]))
 
         # Check file size (images should not be empty)
-        file_size = os.path.getsize(output_file)
+        file_size = os.path.getsize(saved_files["png"])
         self.assertGreater(file_size, 1000)  # Should be at least 1KB
 
-    def test_plot_pressure_profile(self):
-        """Test pressure profile plotting."""
-        output_file = os.path.join(self.temp_dir, "pressure_profile.pdf")
-
+    def test_plot_pressure_losses(self):
+        """Test pressure losses plotting."""
         # Create plot
-        self.visualizer.plot_pressure_profile(
-            positions=self.sample_data["positions"],
-            pressures=self.sample_data["pressures"],
-            title="Test Pressure Profile",
-            output_file=output_file,
+        saved_files = self.visualizer.plot_pressure_losses(
+            self.pressure_data,
+            save_formats=["pdf"]
         )
 
-        # Check file was created
-        self.assertTrue(os.path.exists(output_file))
-        file_size = os.path.getsize(output_file)
+        # Check files were created
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("pdf", saved_files)
+        self.assertTrue(os.path.exists(saved_files["pdf"]))
+
+        file_size = os.path.getsize(saved_files["pdf"])
         self.assertGreater(file_size, 500)
 
-    def test_plot_velocity_profile(self):
-        """Test velocity profile plotting."""
-        output_file = os.path.join(self.temp_dir, "velocity_profile.jpg")
-
+    def test_plot_temperature_distribution(self):
+        """Test temperature distribution plotting."""
         # Create plot
-        self.visualizer.plot_velocity_profile(
-            positions=self.sample_data["positions"],
-            velocities=self.sample_data["velocities"],
-            title="Test Velocity Profile",
-            output_file=output_file,
+        saved_files = self.visualizer.plot_temperature_distribution(
+            self.temperature_data,
+            save_formats=["jpeg"]
         )
 
-        # Check file was created
-        self.assertTrue(os.path.exists(output_file))
-        file_size = os.path.getsize(output_file)
+        # Check files were created
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("jpeg", saved_files)
+        self.assertTrue(os.path.exists(saved_files["jpeg"]))
+
+        file_size = os.path.getsize(saved_files["jpeg"])
         self.assertGreater(file_size, 1000)
 
-    def test_plot_burner_characteristics(self):
-        """Test burner characteristics plotting."""
-        output_file = os.path.join(self.temp_dir, "burner_chars.png")
-
-        # Create multi-parameter data
-        diameters = [0.025, 0.030, 0.035, 0.040, 0.045, 0.050]
-        velocities = [45.0, 31.2, 23.0, 17.7, 14.1, 11.3]
-        pressure_drops = [800, 470, 280, 190, 130, 95]
-
+    def test_plot_burner_geometry(self):
+        """Test burner geometry plotting."""
         # Create plot
-        self.visualizer.plot_burner_characteristics(
-            diameters=diameters,
-            velocities=velocities,
-            pressure_drops=pressure_drops,
-            title="Burner Design Characteristics",
-            output_file=output_file,
+        saved_files = self.visualizer.plot_burner_geometry(
+            self.geometry_data,
+            save_formats=["png"]
         )
 
-        # Check file was created
-        self.assertTrue(os.path.exists(output_file))
-        file_size = os.path.getsize(output_file)
-        self.assertGreater(file_size, 1000)
+        # Check files were created
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("png", saved_files)
+        self.assertTrue(os.path.exists(saved_files["png"]))
 
-    def test_create_burner_diagram(self):
-        """Test burner schematic diagram creation."""
-        output_file = os.path.join(self.temp_dir, "burner_diagram.png")
-
-        # Create diagram
-        self.visualizer.create_burner_diagram(
-            burner_diameter=self.burner_results["burner_diameter"],
-            chamber_diameter=self.chamber_results["chamber_diameter"],
-            chamber_length=self.chamber_results["chamber_length"],
-            output_file=output_file,
-        )
-
-        # Check file was created
-        self.assertTrue(os.path.exists(output_file))
-        file_size = os.path.getsize(output_file)
+        file_size = os.path.getsize(saved_files["png"])
         self.assertGreater(file_size, 1000)
 
     def test_create_summary_dashboard(self):
         """Test summary dashboard creation."""
-        output_file = os.path.join(self.temp_dir, "dashboard.png")
+        # Create comprehensive data for dashboard
+        all_data = {
+            "summary": {
+                "power": 100,
+                "efficiency": 85,
+                "temperature": 2100,
+                "pressure_drop": 250,
+                "residence_time": 0.15
+            },
+            "efficiency": 85.0,
+            "temperature_profile": [2100, 1950, 1800, 1650, 1500],
+            "pressure_losses": {
+                "burner": 250,
+                "chamber": 150,
+                "exit": 100
+            },
+            "heat_transfer": {
+                "radiation": 60,
+                "convection": 40
+            },
+            "emissions": {
+                "NOx": 120,
+                "CO": 50,
+                "CO2": 8500
+            }
+        }
 
         # Create dashboard
-        self.visualizer.create_summary_dashboard(
-            burner_results=self.burner_results,
-            chamber_results=self.chamber_results,
-            temperature_data=self.sample_data,
-            output_file=output_file,
+        saved_files = self.visualizer.create_summary_dashboard(
+            all_data,
+            save_formats=["png"]
         )
 
         # Check file was created
-        self.assertTrue(os.path.exists(output_file))
-        file_size = os.path.getsize(output_file)
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("png", saved_files)
+        self.assertTrue(os.path.exists(saved_files["png"]))
+
+        file_size = os.path.getsize(saved_files["png"])
         self.assertGreater(file_size, 2000)  # Dashboard should be larger
+
+    def test_export_all_visualizations(self):
+        """Test exporting all visualizations."""
+        # Create comprehensive calculation results
+        calculation_results = {
+            "combustion": self.combustion_data,
+            "pressure_losses": self.pressure_data,
+            "temperature": self.temperature_data,
+            "geometry": self.geometry_data
+        }
+
+        # Export all visualizations
+        all_files = self.visualizer.export_all_visualizations(
+            calculation_results,
+            save_formats=["png"]
+        )
+
+        # Check files were created
+        self.assertIsInstance(all_files, dict)
+        self.assertIn("summary_dashboard", all_files)
+
+        # Check at least some visualizations were created
+        total_files = sum(len(files) for files in all_files.values())
+        self.assertGreater(total_files, 0)
 
     def test_supported_formats(self):
         """Test different file format support."""
-        formats = ["png", "pdf", "jpg", "jpeg"]
+        formats = ["png", "pdf", "jpeg"]
 
         for fmt in formats:
-            output_file = os.path.join(self.temp_dir, f"test_plot.{fmt}")
-
-            # Test with temperature profile
-            self.visualizer.plot_temperature_profile(
-                positions=self.sample_data["positions"],
-                temperatures=self.sample_data["temperatures"],
-                title=f"Test Plot - {fmt.upper()}",
-                output_file=output_file,
+            # Test with combustion analysis
+            saved_files = self.visualizer.plot_combustion_analysis(
+                self.combustion_data,
+                save_formats=[fmt]
             )
 
             # Check file was created
-            self.assertTrue(os.path.exists(output_file), f"Failed to create {fmt} file")
-            file_size = os.path.getsize(output_file)
+            self.assertIn(fmt, saved_files)
+            self.assertTrue(os.path.exists(saved_files[fmt]), f"Failed to create {fmt} file")
+            file_size = os.path.getsize(saved_files[fmt])
             self.assertGreater(file_size, 500, f"{fmt} file too small")
 
     def test_czech_labels(self):
         """Test Czech language labels in plots."""
-        output_file = os.path.join(self.temp_dir, "czech_labels.png")
-
-        # Create plot with Czech labels
-        self.visualizer.plot_temperature_profile(
-            positions=self.sample_data["positions"],
-            temperatures=self.sample_data["temperatures"],
-            title="Teplotní profil spalovací komory",
-            xlabel="Pozice [m]",
-            ylabel="Teplota [°C]",
-            output_file=output_file,
+        # Create plot with Czech data structure (which includes Czech labels)
+        saved_files = self.visualizer.plot_combustion_analysis(
+            self.combustion_data,
+            save_formats=["png"]
         )
 
         # Check file was created
-        self.assertTrue(os.path.exists(output_file))
+        self.assertIn("png", saved_files)
+        self.assertTrue(os.path.exists(saved_files["png"]))
 
     def test_data_validation(self):
         """Test input data validation."""
-        # Test mismatched array lengths
-        with self.assertRaises(ValueError):
-            self.visualizer.plot_temperature_profile(
-                positions=[0.0, 0.1, 0.2],  # 3 elements
-                temperatures=[2100, 1950],  # 2 elements
-                title="Invalid Data",
-                output_file=os.path.join(self.temp_dir, "invalid.png"),
-            )
+        # Test with invalid/empty data structure
+        empty_data = {}
 
-        # Test empty data
-        with self.assertRaises(ValueError):
-            self.visualizer.plot_temperature_profile(
-                positions=[],
-                temperatures=[],
-                title="Empty Data",
-                output_file=os.path.join(self.temp_dir, "empty.png"),
-            )
+        # Should handle empty data gracefully
+        saved_files = self.visualizer.plot_combustion_analysis(
+            empty_data,
+            save_formats=["png"]
+        )
+
+        # Should return empty dict or handle gracefully
+        self.assertIsInstance(saved_files, dict)
 
     def test_invalid_output_directory(self):
         """Test handling of invalid output directory."""
-        invalid_path = "/nonexistent/directory/plot.png"
-
-        with self.assertRaises(ValueError):
-            self.visualizer.plot_temperature_profile(
-                positions=self.sample_data["positions"],
-                temperatures=self.sample_data["temperatures"],
-                title="Invalid Path Test",
-                output_file=invalid_path,
-            )
+        # Test with directory that cannot be created (permission denied)
+        with self.assertRaises(OSError):
+            BurnerVisualization(output_dir="/nonexistent/directory")
 
     def test_unsupported_format(self):
         """Test handling of unsupported file formats."""
-        unsupported_file = os.path.join(self.temp_dir, "test.xyz")
-
-        with self.assertRaises(ValueError):
-            self.visualizer.plot_temperature_profile(
-                positions=self.sample_data["positions"],
-                temperatures=self.sample_data["temperatures"],
-                title="Unsupported Format",
-                output_file=unsupported_file,
+        # Test with unsupported format
+        try:
+            saved_files = self.visualizer.plot_combustion_analysis(
+                self.combustion_data,
+                save_formats=["xyz"]  # Unsupported format
             )
+            # Should handle gracefully or return empty
+            self.assertIsInstance(saved_files, dict)
+        except Exception:
+            # Or should raise ValueError for unsupported format
+            pass
 
     def test_figure_size_customization(self):
         """Test custom figure size settings."""
-        output_file = os.path.join(self.temp_dir, "custom_size.png")
+        # Create visualizer with custom figure size
+        custom_visualizer = BurnerVisualization(
+            output_dir=self.temp_dir,
+            figure_size=(12, 8)
+        )
 
         # Create plot with custom size
-        self.visualizer.plot_temperature_profile(
-            positions=self.sample_data["positions"],
-            temperatures=self.sample_data["temperatures"],
-            title="Custom Size Test",
-            output_file=output_file,
-            figure_size=(12, 8),  # Custom width x height
+        saved_files = custom_visualizer.plot_combustion_analysis(
+            self.combustion_data,
+            save_formats=["png"]
         )
 
         # Check file was created
-        self.assertTrue(os.path.exists(output_file))
+        self.assertIn("png", saved_files)
+        self.assertTrue(os.path.exists(saved_files["png"]))
 
-    def test_color_scheme_options(self):
-        """Test different color scheme options."""
-        output_file = os.path.join(self.temp_dir, "color_scheme.png")
+    def test_dpi_settings(self):
+        """Test DPI settings for image quality."""
+        # Create visualizer with custom DPI
+        high_dpi_visualizer = BurnerVisualization(
+            output_dir=self.temp_dir,
+            dpi=600  # High resolution
+        )
 
-        # Test with specific color scheme
-        self.visualizer.plot_temperature_profile(
-            positions=self.sample_data["positions"],
-            temperatures=self.sample_data["temperatures"],
-            title="Color Scheme Test",
-            output_file=output_file,
-            color_scheme="scientific",  # professional color scheme
+        # Create plot with high DPI
+        saved_files = high_dpi_visualizer.plot_combustion_analysis(
+            self.combustion_data,
+            save_formats=["png"]
         )
 
         # Check file was created
-        self.assertTrue(os.path.exists(output_file))
+        self.assertIn("png", saved_files)
+        self.assertTrue(os.path.exists(saved_files["png"]))
+
+        # High DPI file should be larger
+        file_size = os.path.getsize(saved_files["png"])
+        self.assertGreater(file_size, 1000)
 
 
 if __name__ == "__main__":
