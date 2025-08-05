@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black flake8 pytest pytest-cov
+          pip install -r requirements.txt
 
       - name: Run black (autoformat)
         run: |

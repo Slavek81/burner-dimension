@@ -17,7 +17,7 @@ from unittest.mock import Mock, patch, MagicMock, mock_open
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "gui"))
 
-# Mock tkinter before importing GUI module
+# Mock tkinter and calculation modules before importing GUI module
 with patch.dict(
     "sys.modules",
     {
@@ -27,6 +27,12 @@ with patch.dict(
         "tkinter.messagebox": MagicMock(),
         "tkinter.scrolledtext": MagicMock(),
         "pandas": MagicMock(),
+        "combustion": MagicMock(),
+        "burner_design": MagicMock(),
+        "chamber_design": MagicMock(),
+        "radiation": MagicMock(),
+        "pressure_losses": MagicMock(),
+        "visualization": MagicMock(),
     },
 ):
     from gui import BurnerCalculatorGUI  # noqa: E402

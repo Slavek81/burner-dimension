@@ -17,7 +17,6 @@ This directory contains comprehensive documentation for the Gas Burner and Combu
 ### Development Documentation
 - `development_guide.md` - Guide for developers and contributors
 - `testing.md` - Testing procedures and guidelines
-- `deployment.md` - Deployment and distribution instructions
 
 ## Quick Start
 
