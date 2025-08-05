@@ -337,6 +337,7 @@ class TestChamberDesigner(unittest.TestCase):
             chamber_diameter=1.0,
             chamber_length=3.0,
             chamber_area=0.785,
+            chamber_surface_area=12.57,
             residence_time=0.5,
             heat_transfer_coefficient=50.0,
             wall_temperature=800.0,
@@ -376,6 +377,7 @@ class TestChamberDesigner(unittest.TestCase):
             chamber_diameter=1.0,
             chamber_length=3.0,
             chamber_area=0.785,
+            chamber_surface_area=12.57,
             residence_time=0.5,
             heat_transfer_coefficient=50.0,
             wall_temperature=1200.0,  # K
@@ -413,6 +415,7 @@ class TestChamberDesigner(unittest.TestCase):
             chamber_diameter=5.0,     # Too large
             chamber_length=3.0,
             chamber_area=0.785,
+            chamber_surface_area=12.57,
             residence_time=0.05,     # Too short
             heat_transfer_coefficient=50.0,
             wall_temperature=2000.0,  # Too high
@@ -440,6 +443,7 @@ class TestChamberDesigner(unittest.TestCase):
             chamber_diameter=1.0,
             chamber_length=8.0,      # Very long (L/D > 5)
             chamber_area=0.785,
+            chamber_surface_area=12.57,
             residence_time=0.05,     # Too short
             heat_transfer_coefficient=50.0,
             wall_temperature=1700.0,  # High temperature
@@ -503,6 +507,7 @@ class TestChamberDesigner(unittest.TestCase):
             chamber_diameter=1.0,
             chamber_length=3.0,
             chamber_area=0.785,
+            chamber_surface_area=12.57,
             residence_time=0.5,
             heat_transfer_coefficient=50.0,
             wall_temperature=800.0,
@@ -516,6 +521,7 @@ class TestChamberDesigner(unittest.TestCase):
         self.assertEqual(results.chamber_diameter, 1.0)
         self.assertEqual(results.chamber_length, 3.0)
         self.assertEqual(results.chamber_area, 0.785)
+        self.assertEqual(results.chamber_surface_area, 12.57)
         self.assertEqual(results.residence_time, 0.5)
         self.assertEqual(results.heat_transfer_coefficient, 50.0)
         self.assertEqual(results.wall_temperature, 800.0)

@@ -29,6 +29,7 @@ class ChamberDesignResults:
         chamber_diameter (float): Chamber diameter [m]
         chamber_length (float): Chamber length [m]
         chamber_area (float): Chamber cross-sectional area [m²]
+        chamber_surface_area (float): Total chamber surface area [m²]
         residence_time (float): Gas residence time in chamber [s]
         heat_transfer_coefficient (float): Overall heat transfer coefficient [W/m²K]
         wall_temperature (float): Average wall temperature [K]
@@ -41,6 +42,7 @@ class ChamberDesignResults:
     chamber_diameter: float
     chamber_length: float
     chamber_area: float
+    chamber_surface_area: float
     residence_time: float
     heat_transfer_coefficient: float
     wall_temperature: float
@@ -52,7 +54,7 @@ class ChamberDesignResults:
     def chamber_wall_temperature(self) -> float:
         """
         Alias for wall_temperature for backward compatibility.
-        
+
         Returns:
             float: Average wall temperature [K]
         """
@@ -218,6 +220,7 @@ class ChamberDesigner:
             chamber_diameter=chamber_diameter,
             chamber_length=chamber_length,
             chamber_area=chamber_area,
+            chamber_surface_area=chamber_surface_area,
             residence_time=actual_residence_time,
             heat_transfer_coefficient=heat_transfer_coefficient,
             wall_temperature=wall_temperature,
