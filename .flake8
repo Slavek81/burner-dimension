@@ -7,4 +7,9 @@ exclude =
     .pytest_cache,
     build,
     dist,
-    *.egg-info
+    *.egg-info,
+    gui_demo.py,
+    integration_test.py,
+    launch_gui.py,
+    screenshot_demo.py,
+    test_gui_setup.py

@@ -38,15 +38,15 @@ class TestChamberDesigner(unittest.TestCase):
             "properties": {
                 "lower_heating_value_mass": 50000000,  # J/kg
                 "molecular_weight": 16.04,  # g/mol
-                "density": 0.717  # kg/m³
+                "density": 0.717,  # kg/m³
             }
         }
 
         # Mock constants
         self.mock_constants = {
             "universal_gas_constant": 8.314,  # J/(mol·K)
-            "standard_pressure": 101325,      # Pa
-            "air_molecular_weight": 28.97     # g/mol
+            "standard_pressure": 101325,  # Pa
+            "air_molecular_weight": 28.97,  # g/mol
         }
 
         # Mock combustion results
@@ -58,7 +58,7 @@ class TestChamberDesigner(unittest.TestCase):
             adiabatic_flame_temperature=2100.0,
             heat_release_rate=100000,
             co2_volume_percent=10.0,
-            o2_volume_percent=2.0
+            o2_volume_percent=2.0,
         )
 
         # Setup mock returns
@@ -81,7 +81,7 @@ class TestChamberDesigner(unittest.TestCase):
         designer = ChamberDesigner(
             combustion_calculator=self.mock_combustion,
             burner_designer=self.mock_burner,
-            safety_factor=2.0
+            safety_factor=2.0,
         )
         self.assertEqual(designer.combustion_calc, self.mock_combustion)
         self.assertEqual(designer.burner_designer, self.mock_burner)
@@ -97,7 +97,7 @@ class TestChamberDesigner(unittest.TestCase):
             target_residence_time=0.5,
             wall_insulation_thickness=0.1,
             ambient_temperature=293.15,
-            target_efficiency=0.85
+            target_efficiency=0.85,
         )
 
         # Check result type and basic properties
@@ -123,9 +123,7 @@ class TestChamberDesigner(unittest.TestCase):
 
         for rt in residence_times:
             result = designer.design_chamber(
-                fuel_type="methane",
-                required_power=100000,
-                target_residence_time=rt
+                fuel_type="methane", required_power=100000, target_residence_time=rt
             )
             results.append(result)
 
@@ -144,12 +142,12 @@ class TestChamberDesigner(unittest.TestCase):
             # Adjust fuel flow rate in mock for different powers
             fuel_flow = power / 50000000  # Consistent with mock heating value
             self.mock_combustion_result.fuel_flow_rate = fuel_flow
-            self.mock_combustion_result.flue_gas_flow_rate = fuel_flow * 18  # Approximate
+            self.mock_combustion_result.flue_gas_flow_rate = (
+                fuel_flow * 18
+            )  # Approximate
 
             result = designer.design_chamber(
-                fuel_type="methane",
-                required_power=power,
-                target_residence_time=0.5
+                fuel_type="methane", required_power=power, target_residence_time=0.5
             )
             results.append(result)
 
@@ -164,18 +162,14 @@ class TestChamberDesigner(unittest.TestCase):
         # Zero power
         with self.assertRaises(ValueError) as context:
             designer.design_chamber(
-                fuel_type="methane",
-                required_power=0,
-                target_residence_time=0.5
+                fuel_type="methane", required_power=0, target_residence_time=0.5
             )
         self.assertIn("větší než nula", str(context.exception))
 
         # Negative power
         with self.assertRaises(ValueError):
             designer.design_chamber(
-                fuel_type="methane",
-                required_power=-1000,
-                target_residence_time=0.5
+                fuel_type="methane", required_power=-1000, target_residence_time=0.5
             )
 
     def test_invalid_residence_time(self):
@@ -187,7 +181,7 @@ class TestChamberDesigner(unittest.TestCase):
             designer.design_chamber(
                 fuel_type="methane",
                 required_power=100000,
-                target_residence_time=0.05  # Below minimum
+                target_residence_time=0.05,  # Below minimum
             )
         self.assertIn("příliš krátká", str(context.exception))
 
@@ -196,7 +190,7 @@ class TestChamberDesigner(unittest.TestCase):
             designer.design_chamber(
                 fuel_type="methane",
                 required_power=100000,
-                target_residence_time=15.0  # Above maximum
+                target_residence_time=15.0,  # Above maximum
             )
         self.assertIn("příliš dlouhá", str(context.exception))
 
@@ -205,16 +199,14 @@ class TestChamberDesigner(unittest.TestCase):
         designer = ChamberDesigner(combustion_calculator=self.mock_combustion)
 
         volume_flow = designer._calculate_flue_gas_volume_flow(
-            self.mock_combustion_result,
-            2100.0  # Temperature in K
+            self.mock_combustion_result, 2100.0  # Temperature in K
         )
 
         self.assertGreater(volume_flow, 0)
 
         # Test temperature scaling (higher temperature -> higher volume flow)
         volume_flow_high = designer._calculate_flue_gas_volume_flow(
-            self.mock_combustion_result,
-            2500.0  # Higher temperature
+            self.mock_combustion_result, 2500.0  # Higher temperature
         )
 
         self.assertGreater(volume_flow_high, volume_flow)
@@ -256,9 +248,7 @@ class TestChamberDesigner(unittest.TestCase):
         designer = ChamberDesigner()
 
         h = designer._calculate_heat_transfer_coefficient(
-            gas_temperature=2100.0,
-            chamber_diameter=0.5,
-            mass_flow_rate=0.05
+            gas_temperature=2100.0, chamber_diameter=0.5, mass_flow_rate=0.05
         )
 
         self.assertGreater(h, 0)
@@ -279,7 +269,7 @@ class TestChamberDesigner(unittest.TestCase):
             gas_temperature=2100.0,
             heat_transfer_coefficient=50.0,
             insulation_thickness=0.1,
-            ambient_temperature=293.15
+            ambient_temperature=293.15,
         )
 
         # Wall temperature should be between gas and ambient
@@ -290,14 +280,16 @@ class TestChamberDesigner(unittest.TestCase):
         wall_temp_thick = designer._calculate_wall_temperature(
             2100.0, 50.0, 0.2, 293.15  # Thicker insulation
         )
-        self.assertGreater(wall_temp_thick, wall_temp)  # Better insulation -> higher inner wall temp
+        self.assertGreater(
+            wall_temp_thick, wall_temp
+        )  # Better insulation -> higher inner wall temp
 
     def test_calculate_chamber_surface_area(self):
         """Test chamber surface area calculation."""
         designer = ChamberDesigner()
 
         diameter = 1.0  # m
-        length = 3.0   # m
+        length = 3.0  # m
 
         surface_area = designer._calculate_chamber_surface_area(diameter, length)
 
@@ -316,7 +308,7 @@ class TestChamberDesigner(unittest.TestCase):
             surface_area=10.0,
             wall_temperature=800.0,  # K
             ambient_temperature=293.15,
-            insulation_thickness=0.1
+            insulation_thickness=0.1,
         )
 
         self.assertGreater(heat_loss, 0)
@@ -343,13 +335,11 @@ class TestChamberDesigner(unittest.TestCase):
             wall_temperature=800.0,
             heat_loss_rate=5000.0,
             thermal_efficiency=80.0,
-            volume_heat_release_rate=1e6
+            volume_heat_release_rate=1e6,
         )
 
         temp_dist = designer.calculate_temperature_distribution(
-            design_results,
-            self.mock_combustion_result,
-            num_points=5
+            design_results, self.mock_combustion_result, num_points=5
         )
 
         # Check structure
@@ -360,7 +350,9 @@ class TestChamberDesigner(unittest.TestCase):
 
         # Check temperature decay
         temperatures = temp_dist["temperatures"]
-        self.assertGreater(temperatures[0], temperatures[-1])  # Should decrease along length
+        self.assertGreater(
+            temperatures[0], temperatures[-1]
+        )  # Should decrease along length
 
         # Check position range
         positions = temp_dist["positions"]
@@ -383,7 +375,7 @@ class TestChamberDesigner(unittest.TestCase):
             wall_temperature=1200.0,  # K
             heat_loss_rate=5000.0,
             thermal_efficiency=80.0,
-            volume_heat_release_rate=1e6
+            volume_heat_release_rate=1e6,
         )
 
         validation = designer.validate_design(valid_results)
@@ -394,7 +386,7 @@ class TestChamberDesigner(unittest.TestCase):
             "volume_heat_rate_acceptable",
             "dimensions_reasonable",
             "efficiency_acceptable",
-            "wall_temperature_safe"
+            "wall_temperature_safe",
         ]
 
         for key in expected_keys:
@@ -412,16 +404,16 @@ class TestChamberDesigner(unittest.TestCase):
         # Create invalid design results
         invalid_results = ChamberDesignResults(
             chamber_volume=1.0,
-            chamber_diameter=5.0,     # Too large
+            chamber_diameter=5.0,  # Too large
             chamber_length=3.0,
             chamber_area=0.785,
             chamber_surface_area=12.57,
-            residence_time=0.05,     # Too short
+            residence_time=0.05,  # Too short
             heat_transfer_coefficient=50.0,
             wall_temperature=2000.0,  # Too high
-            heat_loss_rate=50000.0,   # High losses
+            heat_loss_rate=50000.0,  # High losses
             thermal_efficiency=50.0,  # Low efficiency
-            volume_heat_release_rate=5e6  # Too high
+            volume_heat_release_rate=5e6,  # Too high
         )
 
         validation = designer.validate_design(invalid_results)
@@ -441,15 +433,15 @@ class TestChamberDesigner(unittest.TestCase):
         problematic_results = ChamberDesignResults(
             chamber_volume=1.0,
             chamber_diameter=1.0,
-            chamber_length=8.0,      # Very long (L/D > 5)
+            chamber_length=8.0,  # Very long (L/D > 5)
             chamber_area=0.785,
             chamber_surface_area=12.57,
-            residence_time=0.05,     # Too short
+            residence_time=0.05,  # Too short
             heat_transfer_coefficient=50.0,
             wall_temperature=1700.0,  # High temperature
             heat_loss_rate=50000.0,
             thermal_efficiency=60.0,  # Low efficiency
-            volume_heat_release_rate=5e6  # Too high
+            volume_heat_release_rate=5e6,  # Too high
         )
 
         recommendations = designer.get_design_recommendations(problematic_results)
@@ -469,7 +461,7 @@ class TestChamberDesigner(unittest.TestCase):
             "properties": {
                 "lower_heating_value_mass": 50000000,
                 "molecular_weight": 16.04,
-                "density": 0.717
+                "density": 0.717,
             }
         }
         mock_combustion.get_fuel_properties.return_value = mock_fuel_props
@@ -484,7 +476,7 @@ class TestChamberDesigner(unittest.TestCase):
             adiabatic_flame_temperature=2100.0,
             heat_release_rate=1000000,  # High heat release
             co2_volume_percent=10.0,
-            o2_volume_percent=2.0
+            o2_volume_percent=2.0,
         )
         mock_combustion.calculate_combustion_products.return_value = high_power_result
 
@@ -494,11 +486,13 @@ class TestChamberDesigner(unittest.TestCase):
         result = designer.design_chamber(
             fuel_type="methane",
             required_power=1000000,  # 1 MW
-            target_residence_time=0.5
+            target_residence_time=0.5,
         )
 
         # Volume heat rate should be within limits
-        self.assertLessEqual(result.volume_heat_release_rate, designer.MAX_VOLUME_HEAT_RATE)
+        self.assertLessEqual(
+            result.volume_heat_release_rate, designer.MAX_VOLUME_HEAT_RATE
+        )
 
     def test_chamber_design_results_dataclass(self):
         """Test ChamberDesignResults dataclass functionality."""
@@ -513,7 +507,7 @@ class TestChamberDesigner(unittest.TestCase):
             wall_temperature=800.0,
             heat_loss_rate=5000.0,
             thermal_efficiency=80.0,
-            volume_heat_release_rate=1e6
+            volume_heat_release_rate=1e6,
         )
 
         # Test all attributes are accessible
@@ -546,14 +540,14 @@ class TestChamberDesigner(unittest.TestCase):
             adiabatic_flame_temperature=2100.0,
             heat_release_rate=10000,
             co2_volume_percent=10.0,
-            o2_volume_percent=2.0
+            o2_volume_percent=2.0,
         )
         self.mock_combustion.calculate_combustion_products.return_value = small_result
 
         result = designer.design_chamber(
             fuel_type="methane",
-            required_power=10000,   # 10 kW - small
-            target_residence_time=0.5
+            required_power=10000,  # 10 kW - small
+            target_residence_time=0.5,
         )
 
         # Should still produce valid results within limits
@@ -572,14 +566,20 @@ class TestChamberDesigner(unittest.TestCase):
                 fuel_type="methane",
                 required_power=100000,
                 target_residence_time=0.5,
-                wall_insulation_thickness=thickness
+                wall_insulation_thickness=thickness,
             )
             results.append(result)
 
         # Better insulation should result in higher inner wall temperature, lower heat losses, higher efficiency
-        self.assertLess(results[0].wall_temperature, results[2].wall_temperature)  # Thicker insulation -> higher inner wall temp
-        self.assertGreater(results[0].heat_loss_rate, results[2].heat_loss_rate)   # Thinner insulation -> higher heat losses
-        self.assertLess(results[0].thermal_efficiency, results[2].thermal_efficiency)  # Thinner insulation -> lower efficiency
+        self.assertLess(
+            results[0].wall_temperature, results[2].wall_temperature
+        )  # Thicker insulation -> higher inner wall temp
+        self.assertGreater(
+            results[0].heat_loss_rate, results[2].heat_loss_rate
+        )  # Thinner insulation -> higher heat losses
+        self.assertLess(
+            results[0].thermal_efficiency, results[2].thermal_efficiency
+        )  # Thinner insulation -> lower efficiency
 
     def test_constants_validation(self):
         """Test that design constants are reasonable."""

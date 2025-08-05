@@ -30,25 +30,15 @@ class TestBurnerVisualization(unittest.TestCase):
         self.combustion_data = {
             "stoichiometric_air": 9.5,
             "actual_air": 10.45,
-            "products": {
-                "CO2": 10.9,
-                "H2O": 20.9,
-                "N2": 67.2,
-                "O2": 1.0
-            },
+            "products": {"CO2": 10.9, "H2O": 20.9, "N2": 67.2, "O2": 1.0},
             "temperature_profile": [2100, 1950, 1800, 1650, 1500, 1350],
-            "heat_release": [800, 750, 650, 500, 300, 100]
+            "heat_release": [800, 750, 650, 500, 300, 100],
         }
 
         self.pressure_data = {
-            "components": {
-                "burner": 250,
-                "chamber": 150,
-                "exit": 100,
-                "piping": 50
-            },
+            "components": {"burner": 250, "chamber": 150, "exit": 100, "piping": 50},
             "positions": [0.0, 0.2, 0.5, 0.8, 1.0],
-            "cumulative": [0, 250, 400, 500, 550]
+            "cumulative": [0, 250, 400, 500, 550],
         }
 
         self.temperature_data = {
@@ -56,20 +46,13 @@ class TestBurnerVisualization(unittest.TestCase):
                 [2100, 2000, 1900, 1800],
                 [2050, 1950, 1850, 1750],
                 [2000, 1900, 1800, 1700],
-                [1950, 1850, 1750, 1650]
+                [1950, 1850, 1750, 1650],
             ]
         }
 
         self.geometry_data = {
-            "chamber": {
-                "length": 0.8,
-                "height": 0.2,
-                "diameter": 0.2
-            },
-            "burner": {
-                "width": 0.1,
-                "height": 0.05
-            }
+            "chamber": {"length": 0.8, "height": 0.2, "diameter": 0.2},
+            "burner": {"width": 0.1, "height": 0.05},
         }
 
     def tearDown(self):
@@ -80,8 +63,7 @@ class TestBurnerVisualization(unittest.TestCase):
         """Test combustion analysis plotting."""
         # Create plot
         saved_files = self.visualizer.plot_combustion_analysis(
-            self.combustion_data,
-            save_formats=["png"]
+            self.combustion_data, save_formats=["png"]
         )
 
         # Check files were created
@@ -97,8 +79,7 @@ class TestBurnerVisualization(unittest.TestCase):
         """Test pressure losses plotting."""
         # Create plot
         saved_files = self.visualizer.plot_pressure_losses(
-            self.pressure_data,
-            save_formats=["pdf"]
+            self.pressure_data, save_formats=["pdf"]
         )
 
         # Check files were created
@@ -113,8 +94,7 @@ class TestBurnerVisualization(unittest.TestCase):
         """Test temperature distribution plotting."""
         # Create plot
         saved_files = self.visualizer.plot_temperature_distribution(
-            self.temperature_data,
-            save_formats=["jpeg"]
+            self.temperature_data, save_formats=["jpeg"]
         )
 
         # Check files were created
@@ -129,8 +109,7 @@ class TestBurnerVisualization(unittest.TestCase):
         """Test burner geometry plotting."""
         # Create plot
         saved_files = self.visualizer.plot_burner_geometry(
-            self.geometry_data,
-            save_formats=["png"]
+            self.geometry_data, save_formats=["png"]
         )
 
         # Check files were created
@@ -150,30 +129,18 @@ class TestBurnerVisualization(unittest.TestCase):
                 "efficiency": 85,
                 "temperature": 2100,
                 "pressure_drop": 250,
-                "residence_time": 0.15
+                "residence_time": 0.15,
             },
             "efficiency": 85.0,
             "temperature_profile": [2100, 1950, 1800, 1650, 1500],
-            "pressure_losses": {
-                "burner": 250,
-                "chamber": 150,
-                "exit": 100
-            },
-            "heat_transfer": {
-                "radiation": 60,
-                "convection": 40
-            },
-            "emissions": {
-                "NOx": 120,
-                "CO": 50,
-                "CO2": 8500
-            }
+            "pressure_losses": {"burner": 250, "chamber": 150, "exit": 100},
+            "heat_transfer": {"radiation": 60, "convection": 40},
+            "emissions": {"NOx": 120, "CO": 50, "CO2": 8500},
         }
 
         # Create dashboard
         saved_files = self.visualizer.create_summary_dashboard(
-            all_data,
-            save_formats=["png"]
+            all_data, save_formats=["png"]
         )
 
         # Check file was created
@@ -191,13 +158,12 @@ class TestBurnerVisualization(unittest.TestCase):
             "combustion": self.combustion_data,
             "pressure_losses": self.pressure_data,
             "temperature": self.temperature_data,
-            "geometry": self.geometry_data
+            "geometry": self.geometry_data,
         }
 
         # Export all visualizations
         all_files = self.visualizer.export_all_visualizations(
-            calculation_results,
-            save_formats=["png"]
+            calculation_results, save_formats=["png"]
         )
 
         # Check files were created
@@ -215,13 +181,14 @@ class TestBurnerVisualization(unittest.TestCase):
         for fmt in formats:
             # Test with combustion analysis
             saved_files = self.visualizer.plot_combustion_analysis(
-                self.combustion_data,
-                save_formats=[fmt]
+                self.combustion_data, save_formats=[fmt]
             )
 
             # Check file was created
             self.assertIn(fmt, saved_files)
-            self.assertTrue(os.path.exists(saved_files[fmt]), f"Failed to create {fmt} file")
+            self.assertTrue(
+                os.path.exists(saved_files[fmt]), f"Failed to create {fmt} file"
+            )
             file_size = os.path.getsize(saved_files[fmt])
             self.assertGreater(file_size, 500, f"{fmt} file too small")
 
@@ -229,8 +196,7 @@ class TestBurnerVisualization(unittest.TestCase):
         """Test Czech language labels in plots."""
         # Create plot with Czech data structure (which includes Czech labels)
         saved_files = self.visualizer.plot_combustion_analysis(
-            self.combustion_data,
-            save_formats=["png"]
+            self.combustion_data, save_formats=["png"]
         )
 
         # Check file was created
@@ -244,8 +210,7 @@ class TestBurnerVisualization(unittest.TestCase):
 
         # Should handle empty data gracefully
         saved_files = self.visualizer.plot_combustion_analysis(
-            empty_data,
-            save_formats=["png"]
+            empty_data, save_formats=["png"]
         )
 
         # Should return empty dict or handle gracefully
@@ -262,8 +227,7 @@ class TestBurnerVisualization(unittest.TestCase):
         # Test with unsupported format
         try:
             saved_files = self.visualizer.plot_combustion_analysis(
-                self.combustion_data,
-                save_formats=["xyz"]  # Unsupported format
+                self.combustion_data, save_formats=["xyz"]  # Unsupported format
             )
             # Should handle gracefully or return empty
             self.assertIsInstance(saved_files, dict)
@@ -275,14 +239,12 @@ class TestBurnerVisualization(unittest.TestCase):
         """Test custom figure size settings."""
         # Create visualizer with custom figure size
         custom_visualizer = BurnerVisualization(
-            output_dir=self.temp_dir,
-            figure_size=(12, 8)
+            output_dir=self.temp_dir, figure_size=(12, 8)
         )
 
         # Create plot with custom size
         saved_files = custom_visualizer.plot_combustion_analysis(
-            self.combustion_data,
-            save_formats=["png"]
+            self.combustion_data, save_formats=["png"]
         )
 
         # Check file was created
@@ -293,14 +255,12 @@ class TestBurnerVisualization(unittest.TestCase):
         """Test DPI settings for image quality."""
         # Create visualizer with custom DPI
         high_dpi_visualizer = BurnerVisualization(
-            output_dir=self.temp_dir,
-            dpi=600  # High resolution
+            output_dir=self.temp_dir, dpi=600  # High resolution
         )
 
         # Create plot with high DPI
         saved_files = high_dpi_visualizer.plot_combustion_analysis(
-            self.combustion_data,
-            save_formats=["png"]
+            self.combustion_data, save_formats=["png"]
         )
 
         # Check file was created

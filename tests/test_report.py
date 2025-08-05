@@ -32,7 +32,7 @@ class TestBurnerReportGenerator(unittest.TestCase):
                 "fuel_type": "methane",
                 "fuel_flow_rate": 0.01,
                 "excess_air_ratio": 1.1,
-                "required_power": 100.0  # kW
+                "required_power": 100.0,  # kW
             },
             "combustion": {
                 "theoretical_air": 9.5,
@@ -40,45 +40,33 @@ class TestBurnerReportGenerator(unittest.TestCase):
                 "excess_air": 10.0,
                 "heating_value": 50.0,
                 "combustion_temp": 2100,
-                "products": {
-                    "CO2": 10.9,
-                    "H2O": 20.9,
-                    "N2": 67.2,
-                    "O2": 1.0
-                }
+                "products": {"CO2": 10.9, "H2O": 20.9, "N2": 67.2, "O2": 1.0},
             },
             "burner": {
                 "type": "Atmospheric",
                 "power": 100.0,
                 "nozzle_diameter": 50.0,
                 "gas_velocity": 25.0,
-                "gas_pressure": 3000
+                "gas_pressure": 3000,
             },
             "chamber": {
                 "volume": 0.025,
                 "length": 0.8,
                 "diameter": 0.2,
                 "residence_time": 0.15,
-                "heat_loading": 4000
+                "heat_loading": 4000,
             },
             "radiation": {
                 "heat_flux": 50.0,
                 "gas_emissivity": 0.3,
                 "wall_emissivity": 0.8,
-                "radiation_efficiency": 75.0
+                "radiation_efficiency": 75.0,
             },
             "pressure_losses": {
-                "components": {
-                    "burner": 250,
-                    "chamber": 150,
-                    "exit": 100
-                }
+                "components": {"burner": 250, "chamber": 150, "exit": 100}
             },
             "efficiency": 85.0,
-            "emissions": {
-                "NOx": 120,
-                "CO": 50
-            }
+            "emissions": {"NOx": 120, "CO": 50},
         }
 
     def tearDown(self):
@@ -90,9 +78,7 @@ class TestBurnerReportGenerator(unittest.TestCase):
         """Test text report generation."""
         # Set metadata first
         self.generator.set_metadata(
-            project_name="Test Project",
-            user_name="Test User",
-            software_version="1.0.0"
+            project_name="Test Project", user_name="Test User", software_version="1.0.0"
         )
 
         # Generate report
@@ -112,10 +98,7 @@ class TestBurnerReportGenerator(unittest.TestCase):
     def test_generate_csv_export(self):
         """Test CSV export generation."""
         # Set metadata first
-        self.generator.set_metadata(
-            project_name="Test Project",
-            user_name="Test User"
-        )
+        self.generator.set_metadata(project_name="Test Project", user_name="Test User")
 
         # Generate CSV export
         output_file = self.generator.generate_csv_export(self.sample_results)
@@ -134,10 +117,7 @@ class TestBurnerReportGenerator(unittest.TestCase):
     def test_generate_excel_report(self):
         """Test Excel report generation."""
         # Set metadata first
-        self.generator.set_metadata(
-            project_name="Test Project",
-            user_name="Test User"
-        )
+        self.generator.set_metadata(project_name="Test Project", user_name="Test User")
 
         # Generate Excel report
         output_file = self.generator.generate_excel_report(self.sample_results)
@@ -178,7 +158,7 @@ class TestBurnerReportGenerator(unittest.TestCase):
             self.sample_results,
             formats=["txt", "csv", "xlsx"],
             project_name="Test Project",
-            user_name="Test User"
+            user_name="Test User",
         )
 
         # Check all files were created
@@ -195,9 +175,7 @@ class TestBurnerReportGenerator(unittest.TestCase):
     def test_metadata_setting(self):
         """Test metadata setting."""
         self.generator.set_metadata(
-            project_name="Test Project",
-            user_name="Test User",
-            software_version="2.0.0"
+            project_name="Test Project", user_name="Test User", software_version="2.0.0"
         )
 
         # Check metadata was set
@@ -227,8 +205,7 @@ class TestBurnerReportGenerator(unittest.TestCase):
 
         # Set metadata with Czech project name
         self.generator.set_metadata(
-            project_name="Testovací projekt",
-            user_name="Test User"
+            project_name="Testovací projekt", user_name="Test User"
         )
 
         # Should not raise encoding errors

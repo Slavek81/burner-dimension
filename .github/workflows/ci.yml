@@ -39,7 +39,7 @@ jobs:
 
       - name: Run flake8 (linter)
         run: |
-          flake8 .
+          flake8 src/ tests/ gui/ main.py
 
       - name: Run tests with coverage
         run: |

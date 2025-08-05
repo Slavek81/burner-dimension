@@ -19,7 +19,7 @@ from pressure_losses import (  # noqa: E402
     PressureLossCalculator,
     PressureLossResults,
     PipeSegment,
-    Fitting
+    Fitting,
 )
 from burner_design import BurnerDesignResults  # noqa: E402
 from combustion import CombustionCalculator  # noqa: E402
@@ -42,15 +42,15 @@ class TestPressureLossCalculator(unittest.TestCase):
                 diameter=0.05,  # 50mm
                 roughness=0.000045,
                 material="steel_new",
-                elevation_change=2.0
+                elevation_change=2.0,
             ),
             PipeSegment(
                 length=5.0,
                 diameter=0.025,  # 25mm
                 roughness=0.000045,
                 material="steel_new",
-                elevation_change=0.0
-            )
+                elevation_change=0.0,
+            ),
         ]
 
         # Sample fittings for testing
@@ -58,7 +58,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             Fitting("elbow_90_long", 2, 0.6, 0.05),
             Fitting("gate_valve_open", 1, 0.15, 0.05),
             Fitting("tee_through", 1, 0.2, 0.05),
-            Fitting("pipe_exit", 1, 1.0, 0.025)
+            Fitting("pipe_exit", 1, 1.0, 0.025),
         ]
 
         # Sample burner results
@@ -70,7 +70,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             required_supply_pressure=600.0,
             heat_release_density=2e6,
             burner_length=0.3,
-            flame_length=1.0
+            flame_length=1.0,
         )
 
     def test_initialization_default(self):
@@ -84,8 +84,7 @@ class TestPressureLossCalculator(unittest.TestCase):
     def test_initialization_with_parameters(self):
         """Test initialization with custom parameters."""
         calc = PressureLossCalculator(
-            combustion_calculator=self.mock_combustion,
-            safety_factor=1.5
+            combustion_calculator=self.mock_combustion, safety_factor=1.5
         )
         self.assertEqual(calc.combustion_calc, self.mock_combustion)
         self.assertEqual(calc.safety_factor, 1.5)
@@ -96,9 +95,9 @@ class TestPressureLossCalculator(unittest.TestCase):
             pipe_segments=self.sample_pipe_segments,
             fittings=self.sample_fittings,
             mass_flow_rate=0.002,  # kg/s
-            gas_density=0.8,       # kg/m³
+            gas_density=0.8,  # kg/m³
             gas_viscosity=1.5e-5,  # Pa·s
-            burner_results=self.sample_burner_results
+            burner_results=self.sample_burner_results,
         )
 
         # Check result type and basic properties
@@ -120,7 +119,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             fittings=self.sample_fittings,
             mass_flow_rate=0.002,
             gas_density=0.8,
-            gas_viscosity=1.5e-5
+            gas_viscosity=1.5e-5,
         )
 
         self.assertEqual(result.burner_pressure_loss, 0.0)
@@ -137,7 +136,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 fittings=self.sample_fittings,
                 mass_flow_rate=flow_rate,
                 gas_density=0.8,
-                gas_viscosity=1.5e-5
+                gas_viscosity=1.5e-5,
             )
             results.append(result)
 
@@ -153,7 +152,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 pipe_segments=self.sample_pipe_segments,
                 fittings=self.sample_fittings,
                 mass_flow_rate=0.0,
-                gas_density=0.8
+                gas_density=0.8,
             )
         self.assertIn("větší než nula", str(context.exception))
 
@@ -163,7 +162,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 pipe_segments=self.sample_pipe_segments,
                 fittings=self.sample_fittings,
                 mass_flow_rate=-0.001,
-                gas_density=0.8
+                gas_density=0.8,
             )
 
     def test_invalid_gas_density(self):
@@ -173,7 +172,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 pipe_segments=self.sample_pipe_segments,
                 fittings=self.sample_fittings,
                 mass_flow_rate=0.002,
-                gas_density=0.0
+                gas_density=0.0,
             )
         self.assertIn("větší než nula", str(context.exception))
 
@@ -184,7 +183,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 pipe_segments=[],
                 fittings=self.sample_fittings,
                 mass_flow_rate=0.002,
-                gas_density=0.8
+                gas_density=0.8,
             )
         self.assertIn("alespoň jeden úsek", str(context.exception))
 
@@ -197,7 +196,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 segment=segment,
                 mass_flow_rate=0.002,
                 gas_density=0.8,
-                gas_viscosity=1.5e-5
+                gas_viscosity=1.5e-5,
             )
         )
 
@@ -273,9 +272,7 @@ class TestPressureLossCalculator(unittest.TestCase):
         fitting = self.sample_fittings[0]  # elbow_90_long
 
         loss = self.calculator._calculate_fitting_loss(
-            fitting=fitting,
-            mass_flow_rate=0.002,
-            gas_density=0.8
+            fitting=fitting, mass_flow_rate=0.002, gas_density=0.8
         )
 
         self.assertGreater(loss, 0)
@@ -336,7 +333,7 @@ class TestPressureLossCalculator(unittest.TestCase):
         """Test equivalent length calculation."""
         fittings = [
             Fitting("elbow_90_sharp", 2, 0.9, 0.05),
-            Fitting("gate_valve_open", 1, 0.15, 0.05)
+            Fitting("gate_valve_open", 1, 0.15, 0.05),
         ]
 
         equivalent_length = self.calculator.calculate_equivalent_length(fittings, 0.05)
@@ -354,7 +351,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             gas_density=0.8,
             max_pressure_loss=1000.0,
             material="steel_new",
-            max_velocity=15.0
+            max_velocity=15.0,
         )
 
         # Check result structure
@@ -377,7 +374,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             gas_density=0.8,
             max_pressure_loss=1.0,  # Even lower pressure limit
             material="steel_new",
-            max_velocity=1.0  # Even lower velocity limit
+            max_velocity=1.0,  # Even lower velocity limit
         )
 
         # Should return warning or find best possible solution
@@ -410,7 +407,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             diameter=0.05,
             roughness=0.000045,
             material="steel_new",
-            elevation_change=2.0
+            elevation_change=2.0,
         )
 
         self.assertEqual(segment.length, 10.0)
@@ -422,10 +419,7 @@ class TestPressureLossCalculator(unittest.TestCase):
     def test_fitting_dataclass(self):
         """Test Fitting dataclass functionality."""
         fitting = Fitting(
-            type="elbow_90_long",
-            quantity=2,
-            loss_coefficient=0.6,
-            diameter=0.05
+            type="elbow_90_long", quantity=2, loss_coefficient=0.6, diameter=0.05
         )
 
         self.assertEqual(fitting.type, "elbow_90_long")
@@ -445,7 +439,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             system_resistance_coefficient=2.5,
             reynolds_number=5000.0,
             friction_factor=0.025,
-            velocity_pressure=400.0
+            velocity_pressure=400.0,
         )
 
         # Test all attributes are accessible
@@ -466,7 +460,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             length=1.0,
             diameter=0.01,  # 10mm - small diameter
             roughness=0.000045,
-            material="steel_new"
+            material="steel_new",
         )
 
         friction_loss, reynolds, friction_factor, velocity_pressure = (
@@ -474,7 +468,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 segment=small_segment,
                 mass_flow_rate=0.0001,  # Small flow rate
                 gas_density=0.8,
-                gas_viscosity=1.5e-5
+                gas_viscosity=1.5e-5,
             )
         )
 
@@ -489,7 +483,7 @@ class TestPressureLossCalculator(unittest.TestCase):
             length=10.0,
             diameter=0.5,  # 500mm - large diameter
             roughness=0.000045,
-            material="steel_new"
+            material="steel_new",
         )
 
         friction_loss, reynolds, friction_factor, velocity_pressure = (
@@ -497,7 +491,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 segment=large_segment,
                 mass_flow_rate=0.1,  # Large flow rate
                 gas_density=0.8,
-                gas_viscosity=1.5e-5
+                gas_viscosity=1.5e-5,
             )
         )
 
@@ -516,26 +510,26 @@ class TestPressureLossCalculator(unittest.TestCase):
             pipe_segments=self.sample_pipe_segments,
             fittings=self.sample_fittings,
             mass_flow_rate=0.002,
-            gas_density=0.8
+            gas_density=0.8,
         )
 
         result_20 = calc_20.calculate_system_pressure_losses(
             pipe_segments=self.sample_pipe_segments,
             fittings=self.sample_fittings,
             mass_flow_rate=0.002,
-            gas_density=0.8
+            gas_density=0.8,
         )
 
         # Total pressure loss should be the same
         self.assertAlmostEqual(
-            result_15.total_pressure_loss,
-            result_20.total_pressure_loss,
-            places=1
+            result_15.total_pressure_loss, result_20.total_pressure_loss, places=1
         )
 
         # Required supply pressure should scale with safety factor
         expected_ratio = 2.0 / 1.5
-        actual_ratio = result_20.required_supply_pressure / result_15.required_supply_pressure
+        actual_ratio = (
+            result_20.required_supply_pressure / result_15.required_supply_pressure
+        )
         self.assertAlmostEqual(actual_ratio, expected_ratio, places=2)
 
     def test_different_pipe_materials(self):
@@ -548,7 +542,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                 length=10.0,
                 diameter=0.05,
                 roughness=self.calculator.get_pipe_roughness(material),
-                material=material
+                material=material,
             )
 
             friction_loss, _, friction_factor, _ = (
@@ -557,11 +551,13 @@ class TestPressureLossCalculator(unittest.TestCase):
                 )
             )
 
-            results.append({
-                "material": material,
-                "friction_loss": friction_loss,
-                "friction_factor": friction_factor
-            })
+            results.append(
+                {
+                    "material": material,
+                    "friction_loss": friction_loss,
+                    "friction_factor": friction_factor,
+                }
+            )
 
         # Smoother materials should have lower friction factors and losses
         smooth_materials = ["copper", "plastic"]
@@ -574,7 +570,7 @@ class TestPressureLossCalculator(unittest.TestCase):
                     rough_result = next(r for r in results if r["material"] == rough)
                     self.assertLess(
                         smooth_result["friction_factor"],
-                        rough_result["friction_factor"]
+                        rough_result["friction_factor"],
                     )
 
 

@@ -100,7 +100,9 @@ class BurnerCalculatorGUI:
 
         # Title label
         title_label = ttk.Label(
-            main_frame, text="Návrh plynového hořáku a spalovací komory", font=("Arial", 16, "bold")
+            main_frame,
+            text="Návrh plynového hořáku a spalovací komory",
+            font=("Arial", 16, "bold"),
         )
         title_label.grid(row=0, column=0, pady=(0, 10))
 
@@ -147,7 +149,9 @@ class BurnerCalculatorGUI:
         fuel_frame = ttk.LabelFrame(scrollable_frame, text="Palivo", padding="10")
         fuel_frame.pack(fill="x", padx=5, pady=5)
 
-        ttk.Label(fuel_frame, text="Typ paliva:").grid(row=0, column=0, sticky="w", padx=(0, 10))
+        ttk.Label(fuel_frame, text="Typ paliva:").grid(
+            row=0, column=0, sticky="w", padx=(0, 10)
+        )
         self.input_vars["fuel_type"] = ttk.Combobox(
             fuel_frame,
             values=list(self.calculators["combustion"].get_available_fuels()),
@@ -165,31 +169,47 @@ class BurnerCalculatorGUI:
             row=0, column=0, sticky="w"
         )
         self.input_vars["fuel_flow_rate"] = ttk.Entry(flow_frame)
-        self.input_vars["fuel_flow_rate"].grid(row=0, column=1, sticky="ew", padx=(10, 0))
+        self.input_vars["fuel_flow_rate"].grid(
+            row=0, column=1, sticky="ew", padx=(10, 0)
+        )
 
         # Excess air ratio
         ttk.Label(flow_frame, text="Koeficient přebytku vzduchu [-]:").grid(
             row=1, column=0, sticky="w"
         )
         self.input_vars["excess_air_ratio"] = ttk.Entry(flow_frame)
-        self.input_vars["excess_air_ratio"].grid(row=1, column=1, sticky="ew", padx=(10, 0))
+        self.input_vars["excess_air_ratio"].grid(
+            row=1, column=1, sticky="ew", padx=(10, 0)
+        )
 
         # Operating conditions
-        conditions_frame = ttk.LabelFrame(scrollable_frame, text="Provozní podmínky", padding="10")
+        conditions_frame = ttk.LabelFrame(
+            scrollable_frame, text="Provozní podmínky", padding="10"
+        )
         conditions_frame.pack(fill="x", padx=5, pady=5)
 
         # Ambient temperature
-        ttk.Label(conditions_frame, text="Teplota okolí [°C]:").grid(row=0, column=0, sticky="w")
+        ttk.Label(conditions_frame, text="Teplota okolí [°C]:").grid(
+            row=0, column=0, sticky="w"
+        )
         self.input_vars["ambient_temperature"] = ttk.Entry(conditions_frame)
-        self.input_vars["ambient_temperature"].grid(row=0, column=1, sticky="ew", padx=(10, 0))
+        self.input_vars["ambient_temperature"].grid(
+            row=0, column=1, sticky="ew", padx=(10, 0)
+        )
 
         # Ambient pressure
-        ttk.Label(conditions_frame, text="Tlak okolí [Pa]:").grid(row=1, column=0, sticky="w")
+        ttk.Label(conditions_frame, text="Tlak okolí [Pa]:").grid(
+            row=1, column=0, sticky="w"
+        )
         self.input_vars["ambient_pressure"] = ttk.Entry(conditions_frame)
-        self.input_vars["ambient_pressure"].grid(row=1, column=1, sticky="ew", padx=(10, 0))
+        self.input_vars["ambient_pressure"].grid(
+            row=1, column=1, sticky="ew", padx=(10, 0)
+        )
 
         # Burner design parameters
-        burner_frame = ttk.LabelFrame(scrollable_frame, text="Parametry hořáku", padding="10")
+        burner_frame = ttk.LabelFrame(
+            scrollable_frame, text="Parametry hořáku", padding="10"
+        )
         burner_frame.pack(fill="x", padx=5, pady=5)
 
         # Maximum gas velocity
@@ -197,15 +217,23 @@ class BurnerCalculatorGUI:
             row=0, column=0, sticky="w"
         )
         self.input_vars["max_gas_velocity"] = ttk.Entry(burner_frame)
-        self.input_vars["max_gas_velocity"].grid(row=0, column=1, sticky="ew", padx=(10, 0))
+        self.input_vars["max_gas_velocity"].grid(
+            row=0, column=1, sticky="ew", padx=(10, 0)
+        )
 
         # Supply pressure
-        ttk.Label(burner_frame, text="Tlak přívodu plynu [Pa]:").grid(row=1, column=0, sticky="w")
+        ttk.Label(burner_frame, text="Tlak přívodu plynu [Pa]:").grid(
+            row=1, column=0, sticky="w"
+        )
         self.input_vars["supply_pressure"] = ttk.Entry(burner_frame)
-        self.input_vars["supply_pressure"].grid(row=1, column=1, sticky="ew", padx=(10, 0))
+        self.input_vars["supply_pressure"].grid(
+            row=1, column=1, sticky="ew", padx=(10, 0)
+        )
 
         # Chamber design parameters
-        chamber_frame = ttk.LabelFrame(scrollable_frame, text="Parametry komory", padding="10")
+        chamber_frame = ttk.LabelFrame(
+            scrollable_frame, text="Parametry komory", padding="10"
+        )
         chamber_frame.pack(fill="x", padx=5, pady=5)
 
         # Required heat output
@@ -220,12 +248,20 @@ class BurnerCalculatorGUI:
             row=1, column=0, sticky="w"
         )
         self.input_vars["max_chamber_temp"] = ttk.Entry(chamber_frame)
-        self.input_vars["max_chamber_temp"].grid(row=1, column=1, sticky="ew", padx=(10, 0))
+        self.input_vars["max_chamber_temp"].grid(
+            row=1, column=1, sticky="ew", padx=(10, 0)
+        )
 
         # Note: Heat release density is calculated automatically in burner design
 
         # Configure column weights
-        for frame in [fuel_frame, flow_frame, conditions_frame, burner_frame, chamber_frame]:
+        for frame in [
+            fuel_frame,
+            flow_frame,
+            conditions_frame,
+            burner_frame,
+            chamber_frame,
+        ]:
             frame.columnconfigure(1, weight=1)
 
     def create_combustion_tab(self):
@@ -245,7 +281,9 @@ class BurnerCalculatorGUI:
         self.notebook.add(burner_frame, text="Návrh hořáku")
 
         # Results display
-        self.burner_text = scrolledtext.ScrolledText(burner_frame, height=20, font=("Courier", 10))
+        self.burner_text = scrolledtext.ScrolledText(
+            burner_frame, height=20, font=("Courier", 10)
+        )
         self.burner_text.pack(fill="both", expand=True, padx=10, pady=10)
 
     def create_chamber_tab(self):
@@ -302,15 +340,15 @@ class BurnerCalculatorGUI:
         self.progress.pack(side="left", fill="x", expand=True, padx=(0, 10))
 
         # Buttons
-        ttk.Button(button_frame, text="Načíst vstup", command=self.load_input_file).pack(
-            side="right", padx=(0, 5)
-        )
-        ttk.Button(button_frame, text="Uložit vstup", command=self.save_input_file).pack(
-            side="right", padx=(0, 5)
-        )
-        ttk.Button(button_frame, text="Exportovat výsledky", command=self.export_results).pack(
-            side="right", padx=(0, 5)
-        )
+        ttk.Button(
+            button_frame, text="Načíst vstup", command=self.load_input_file
+        ).pack(side="right", padx=(0, 5))
+        ttk.Button(
+            button_frame, text="Uložit vstup", command=self.save_input_file
+        ).pack(side="right", padx=(0, 5))
+        ttk.Button(
+            button_frame, text="Exportovat výsledky", command=self.export_results
+        ).pack(side="right", padx=(0, 5))
         ttk.Button(
             button_frame,
             text="Spustit výpočet",
@@ -330,7 +368,9 @@ class BurnerCalculatorGUI:
         file_menu.add_command(label="Načíst vstup...", command=self.load_input_file)
         file_menu.add_command(label="Uložit vstup...", command=self.save_input_file)
         file_menu.add_separator()
-        file_menu.add_command(label="Exportovat výsledky...", command=self.export_results)
+        file_menu.add_command(
+            label="Exportovat výsledky...", command=self.export_results
+        )
         file_menu.add_separator()
         file_menu.add_command(label="Ukončit", command=self.root.quit)
 
@@ -338,7 +378,9 @@ class BurnerCalculatorGUI:
         tools_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Nástroje", menu=tools_menu)
         tools_menu.add_command(label="Validovat vstup", command=self.validate_input)
-        tools_menu.add_command(label="Výchozí hodnoty", command=self.load_default_values)
+        tools_menu.add_command(
+            label="Výchozí hodnoty", command=self.load_default_values
+        )
 
         # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -384,18 +426,24 @@ class BurnerCalculatorGUI:
 
             # Validate fuel flow rate
             if self.input_data["fuel_flow_rate"] <= 0:
-                self.validation_errors.append("Hmotnostní průtok paliva musí být větší než nula")
+                self.validation_errors.append(
+                    "Hmotnostní průtok paliva musí být větší než nula"
+                )
 
             # Validate excess air ratio
             if self.input_data["excess_air_ratio"] < 1.0:
-                self.validation_errors.append("Koeficient přebytku vzduchu musí být ≥ 1.0")
+                self.validation_errors.append(
+                    "Koeficient přebytku vzduchu musí být ≥ 1.0"
+                )
 
             # Validate temperatures
             if (
                 self.input_data["ambient_temperature"] < -50
                 or self.input_data["ambient_temperature"] > 100
             ):
-                self.validation_errors.append("Teplota okolí musí být mezi -50°C a 100°C")
+                self.validation_errors.append(
+                    "Teplota okolí musí být mezi -50°C a 100°C"
+                )
 
             if (
                 self.input_data["max_chamber_temp"] < 500
@@ -410,18 +458,29 @@ class BurnerCalculatorGUI:
                 self.input_data["ambient_pressure"] < 50000
                 or self.input_data["ambient_pressure"] > 200000
             ):
-                self.validation_errors.append("Tlak okolí musí být mezi 50 kPa a 200 kPa")
+                self.validation_errors.append(
+                    "Tlak okolí musí být mezi 50 kPa a 200 kPa"
+                )
 
             if self.input_data["supply_pressure"] < 1000:
-                self.validation_errors.append("Tlak přívodu plynu musí být alespoň 1000 Pa")
+                self.validation_errors.append(
+                    "Tlak přívodu plynu musí být alespoň 1000 Pa"
+                )
 
             # Validate gas velocity
-            if self.input_data["max_gas_velocity"] < 1 or self.input_data["max_gas_velocity"] > 200:
-                self.validation_errors.append("Maximální rychlost plynu musí být mezi 1 a 200 m/s")
+            if (
+                self.input_data["max_gas_velocity"] < 1
+                or self.input_data["max_gas_velocity"] > 200
+            ):
+                self.validation_errors.append(
+                    "Maximální rychlost plynu musí být mezi 1 a 200 m/s"
+                )
 
             # Validate heat output
             if self.input_data["heat_output"] <= 0:
-                self.validation_errors.append("Požadovaný tepelný výkon musí být větší než nula")
+                self.validation_errors.append(
+                    "Požadovaný tepelný výkon musí být větší než nula"
+                )
 
         except ValueError as e:
             self.validation_errors.append(f"Chyba při převodu číselných hodnot: {e}")
@@ -431,7 +490,9 @@ class BurnerCalculatorGUI:
         # Show validation results
         if self.validation_errors:
             error_message = "Nalezeny následující chyby ve vstupních datech:\n\n"
-            error_message += "\n".join([f"• {error}" for error in self.validation_errors])
+            error_message += "\n".join(
+                [f"• {error}" for error in self.validation_errors]
+            )
             messagebox.showerror("Chyby ve vstupních datech", error_message)
             return False
         else:
@@ -464,7 +525,9 @@ class BurnerCalculatorGUI:
             try:
                 self.input_data[field] = float(value_str)
             except ValueError:
-                raise ValueError(f"Neplatná číselná hodnota v poli '{field}': {value_str}")
+                raise ValueError(
+                    f"Neplatná číselná hodnota v poli '{field}': {value_str}"
+                )
 
     def run_calculations(self):
         """Run all calculations in separate thread."""
@@ -479,7 +542,9 @@ class BurnerCalculatorGUI:
         for child in self.root.winfo_children():
             if isinstance(child, ttk.Frame):
                 for subchild in child.winfo_children():
-                    if isinstance(subchild, ttk.Button) and "Spustit výpočet" in str(subchild):
+                    if isinstance(subchild, ttk.Button) and "Spustit výpočet" in str(
+                        subchild
+                    ):
                         subchild.configure(state="disabled")
 
         # Run calculations in separate thread
@@ -546,13 +611,15 @@ class BurnerCalculatorGUI:
 
             # Create sample pipe segments and fittings for demonstration
             from src.pressure_losses import PipeSegment
+
             sample_pipe_segments = [
                 PipeSegment(
-                    length=chamber_results.chamber_length + 2.0,  # Chamber + connection pipes
+                    length=chamber_results.chamber_length
+                    + 2.0,  # Chamber + connection pipes
                     diameter=burner_results.burner_diameter,
                     roughness=0.000045,  # Steel pipe
                     material="steel_new",
-                    elevation_change=0.5  # Small elevation change
+                    elevation_change=0.5,  # Small elevation change
                 )
             ]
 
@@ -561,17 +628,23 @@ class BurnerCalculatorGUI:
             )
 
             # Calculate gas density from combustion results
-            fuel_props = combustion_calc.get_fuel_properties(self.input_data["fuel_type"])
-            molecular_weight = fuel_props["properties"]["molecular_weight"] / 1000  # g/mol to kg/mol
+            fuel_props = combustion_calc.get_fuel_properties(
+                self.input_data["fuel_type"]
+            )
+            molecular_weight = (
+                fuel_props["properties"]["molecular_weight"] / 1000
+            )  # g/mol to kg/mol
             gas_constant = combustion_calc.constants["universal_gas_constant"]
-            gas_density = (101325 * molecular_weight) / (gas_constant * 573)  # At ~300°C
+            gas_density = (101325 * molecular_weight) / (
+                gas_constant * 573
+            )  # At ~300°C
 
             pressure_results = pressure_calc.calculate_system_pressure_losses(
                 pipe_segments=sample_pipe_segments,
                 fittings=sample_fittings,
                 mass_flow_rate=combustion_results.flue_gas_flow_rate,
                 gas_density=gas_density,
-                burner_results=burner_results
+                burner_results=burner_results,
             )
             self.results["pressure"] = pressure_results
 
@@ -599,7 +672,9 @@ class BurnerCalculatorGUI:
         for child in self.root.winfo_children():
             if isinstance(child, ttk.Frame):
                 for subchild in child.winfo_children():
-                    if isinstance(subchild, ttk.Button) and "Spustit výpočet" in str(subchild):
+                    if isinstance(subchild, ttk.Button) and "Spustit výpočet" in str(
+                        subchild
+                    ):
                         subchild.configure(state="normal")
 
     def _display_all_results(self):
@@ -623,7 +698,9 @@ class BurnerCalculatorGUI:
             self._display_summary_results()
 
         except Exception as e:
-            messagebox.showerror("Chyba zobrazení", f"Chyba při zobrazování výsledků: {e}")
+            messagebox.showerror(
+                "Chyba zobrazení", f"Chyba při zobrazování výsledků: {e}"
+            )
 
     def _display_combustion_results(self):
         """Display combustion calculation results."""
@@ -638,7 +715,9 @@ class BurnerCalculatorGUI:
         text += f"Hmotnostní průtok spalin: {results.flue_gas_flow_rate:.6f} kg/s\n\n"
 
         text += f"Koeficient přebytku vzduchu: {results.excess_air_ratio:.2f} [-]\n"
-        text += f"Adiabatická teplota plamene: {results.adiabatic_flame_temperature:.1f} K "
+        text += (
+            f"Adiabatická teplota plamene: {results.adiabatic_flame_temperature:.1f} K "
+        )
         text += f"({results.adiabatic_flame_temperature-273.15:.1f} °C)\n"
         text += f"Tepelný výkon: {results.heat_release_rate/1000:.1f} kW\n\n"
 
@@ -664,7 +743,9 @@ class BurnerCalculatorGUI:
         text += f"Odhadovaná délka plamene: {results.flame_length:.2f} m\n\n"
 
         text += f"Tlakový spád na hořáku: {results.burner_pressure_drop:.0f} Pa\n"
-        text += f"Požadovaný přítlak plynu: {results.required_supply_pressure:.0f} Pa\n\n"
+        text += (
+            f"Požadovaný přítlak plynu: {results.required_supply_pressure:.0f} Pa\n\n"
+        )
 
         text += f"Hustota tepelného toku: {results.volume_heat_release_rate/1000:.0f} kW/m²\n"
 
@@ -705,9 +786,7 @@ class BurnerCalculatorGUI:
         text += f"Emisivita stěny: {results.wall_emissivity:.3f} [-]\n\n"
 
         text += f"Tepelný tok plamen → stěna: {results.flame_to_wall_heat_transfer/1000:.1f} kW\n"
-        text += (
-            f"Tepelný tok stěna → okolí: {results.wall_to_ambient_heat_transfer/1000:.1f} kW\n\n"
-        )
+        text += f"Tepelný tok stěna → okolí: {results.wall_to_ambient_heat_transfer/1000:.1f} kW\n\n"
 
         text += f"Účinná teplota plamene: {results.effective_flame_temperature:.1f} K "
         text += f"({results.effective_flame_temperature-273.15:.1f} °C)\n"
@@ -749,7 +828,9 @@ class BurnerCalculatorGUI:
         text += "-" * 30 + "\n"
         text += f"Typ paliva: {self.input_data['fuel_type']}\n"
         text += f"Hmotnostní průtok paliva: {self.input_data['fuel_flow_rate']} kg/s\n"
-        text += f"Koeficient přebytku vzduchu: {self.input_data['excess_air_ratio']} [-]\n"
+        text += (
+            f"Koeficient přebytku vzduchu: {self.input_data['excess_air_ratio']} [-]\n"
+        )
         text += f"Požadovaný tepelný výkon: {self.input_data['heat_output']} kW\n\n"
 
         # Key results summary
@@ -762,7 +843,9 @@ class BurnerCalculatorGUI:
 
             # Combustion
             combustion = self.results["combustion"]
-            text += f"Skutečný tepelný výkon: {combustion.heat_release_rate/1000:.1f} kW\n"
+            text += (
+                f"Skutečný tepelný výkon: {combustion.heat_release_rate/1000:.1f} kW\n"
+            )
             text += f"Průtok vzduchu: {combustion.air_flow_rate:.6f} kg/s\n"
             text += f"Teplota plamene: {combustion.adiabatic_flame_temperature-273.15:.0f} °C\n\n"
 
@@ -786,7 +869,9 @@ class BurnerCalculatorGUI:
 
             # Radiation
             radiation = self.results["radiation"]
-            text += f"Radiační tepelný tok: {radiation.total_heat_transfer/1000:.1f} kW\n"
+            text += (
+                f"Radiační tepelný tok: {radiation.total_heat_transfer/1000:.1f} kW\n"
+            )
 
         self.results_text.delete(1.0, tk.END)
         self.results_text.insert(1.0, text)
@@ -812,7 +897,9 @@ class BurnerCalculatorGUI:
                             self.input_vars[key].delete(0, tk.END)
                             self.input_vars[key].insert(0, str(value))
 
-                messagebox.showinfo("Úspěch", f"Vstupní parametry načteny ze souboru:\n{filename}")
+                messagebox.showinfo(
+                    "Úspěch", f"Vstupní parametry načteny ze souboru:\n{filename}"
+                )
 
             except Exception as e:
                 messagebox.showerror("Chyba", f"Chyba při načítání souboru:\n{e}")
@@ -832,7 +919,9 @@ class BurnerCalculatorGUI:
                 with open(filename, "w", encoding="utf-8") as f:
                     json.dump(self.input_data, f, indent=2, ensure_ascii=False)
 
-                messagebox.showinfo("Úspěch", f"Vstupní parametry uloženy do souboru:\n{filename}")
+                messagebox.showinfo(
+                    "Úspěch", f"Vstupní parametry uloženy do souboru:\n{filename}"
+                )
 
             except Exception as e:
                 messagebox.showerror("Chyba", f"Chyba při ukládání souboru:\n{e}")
@@ -850,7 +939,8 @@ class BurnerCalculatorGUI:
         """Start new project with default values."""
         result = messagebox.askyesno(
             "Nový projekt",
-            "Opravdu chcete začít nový projekt?\n" "Všechny neusložené změny budou ztraceny.",
+            "Opravdu chcete začít nový projekt?\n"
+            "Všechny neusložené změny budou ztraceny.",
         )
         if result:
             self.load_default_values()
@@ -941,15 +1031,15 @@ class ExportDialog:
         self.include_results = tk.BooleanVar(value=True)
         self.include_detailed = tk.BooleanVar(value=False)
 
-        ttk.Checkbutton(content_frame, text="Vstupní parametry", variable=self.include_input).pack(
-            anchor="w"
-        )
-        ttk.Checkbutton(content_frame, text="Výsledky výpočtů", variable=self.include_results).pack(
-            anchor="w"
-        )
-        ttk.Checkbutton(content_frame, text="Detailní údaje", variable=self.include_detailed).pack(
-            anchor="w"
-        )
+        ttk.Checkbutton(
+            content_frame, text="Vstupní parametry", variable=self.include_input
+        ).pack(anchor="w")
+        ttk.Checkbutton(
+            content_frame, text="Výsledky výpočtů", variable=self.include_results
+        ).pack(anchor="w")
+        ttk.Checkbutton(
+            content_frame, text="Detailní údaje", variable=self.include_detailed
+        ).pack(anchor="w")
 
         # Buttons
         button_frame = ttk.Frame(main_frame)
@@ -958,7 +1048,9 @@ class ExportDialog:
         ttk.Button(button_frame, text="Zrušit", command=self.dialog.destroy).pack(
             side="right", padx=(5, 0)
         )
-        ttk.Button(button_frame, text="Exportovat", command=self.export_data).pack(side="right")
+        ttk.Button(button_frame, text="Exportovat", command=self.export_data).pack(
+            side="right"
+        )
 
     def export_data(self):
         """Export data in selected format."""
@@ -973,7 +1065,9 @@ class ExportDialog:
             )
         elif format_type == "csv":
             filename = filedialog.asksaveasfilename(
-                title="Export do CSV", defaultextension=".csv", filetypes=[("CSV soubory", "*.csv")]
+                title="Export do CSV",
+                defaultextension=".csv",
+                filetypes=[("CSV soubory", "*.csv")],
             )
         elif format_type == "excel":
             filename = filedialog.asksaveasfilename(
@@ -1004,7 +1098,9 @@ class ExportDialog:
         with open(filename, "w", encoding="utf-8") as f:
             f.write("VÝSLEDKY VÝPOČTU PLYNOVÉHO HOŘÁKU A SPALOVACÍ KOMORY\n")
             f.write("=" * 60 + "\n\n")
-            f.write(f"Datum exportu: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n\n")
+            f.write(
+                f"Datum exportu: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n\n"
+            )
 
             if self.include_input.get():
                 f.write("VSTUPNÍ PARAMETRY:\n")
@@ -1052,13 +1148,16 @@ class ExportDialog:
                     input_df = pd.DataFrame(
                         list(self.input_data.items()), columns=["Parametr", "Hodnota"]
                     )
-                    input_df.to_excel(writer, sheet_name="Vstupní parametry", index=False)
+                    input_df.to_excel(
+                        writer, sheet_name="Vstupní parametry", index=False
+                    )
 
                 if self.include_results.get():
                     for module_name, results in self.results.items():
                         if hasattr(results, "__dict__"):
                             result_df = pd.DataFrame(
-                                list(results.__dict__.items()), columns=["Parametr", "Hodnota"]
+                                list(results.__dict__.items()),
+                                columns=["Parametr", "Hodnota"],
                             )
                             result_df.to_excel(
                                 writer, sheet_name=module_name.capitalize(), index=False

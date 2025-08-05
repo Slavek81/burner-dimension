@@ -28,7 +28,9 @@ class TestCombustionCalculator(unittest.TestCase):
     def test_methane_stoichiometric_air(self):
         """Test stoichiometric air calculation for methane."""
         fuel_flow_rate = 0.01  # kg/s
-        air_required = self.calculator.calculate_stoichiometric_air("methane", fuel_flow_rate)
+        air_required = self.calculator.calculate_stoichiometric_air(
+            "methane", fuel_flow_rate
+        )
 
         # Check basic properties
         self.assertIsInstance(air_required, float)
@@ -42,7 +44,9 @@ class TestCombustionCalculator(unittest.TestCase):
     def test_propane_stoichiometric_air(self):
         """Test stoichiometric air calculation for propane."""
         fuel_flow_rate = 0.01  # kg/s
-        air_required = self.calculator.calculate_stoichiometric_air("propane", fuel_flow_rate)
+        air_required = self.calculator.calculate_stoichiometric_air(
+            "propane", fuel_flow_rate
+        )
 
         # Check basic properties
         self.assertIsInstance(air_required, float)
@@ -55,7 +59,9 @@ class TestCombustionCalculator(unittest.TestCase):
     def test_natural_gas_stoichiometric_air(self):
         """Test stoichiometric air calculation for natural gas."""
         fuel_flow_rate = 0.01  # kg/s
-        air_required = self.calculator.calculate_stoichiometric_air("natural_gas", fuel_flow_rate)
+        air_required = self.calculator.calculate_stoichiometric_air(
+            "natural_gas", fuel_flow_rate
+        )
 
         # Check basic properties
         self.assertIsInstance(air_required, float)

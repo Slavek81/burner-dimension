@@ -12,28 +12,28 @@ import sys
 import os
 import tkinter as tk
 
-# Add src directory to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+# Add src directory to path for imports  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-from gui.gui import BurnerCalculatorGUI
+from gui.gui import BurnerCalculatorGUI  # noqa: E402
 
 
 def main():
     """
     Main entry point for the application.
-    
+
     Initializes and runs the GUI application for burner calculations.
     """
     try:
         # Create root window
         root = tk.Tk()
-        
+
         # Initialize application
-        app = BurnerCalculatorGUI(root)
-        
+        app = BurnerCalculatorGUI(root)  # noqa: F841
+
         # Start main loop
         root.mainloop()
-        
+
     except Exception as e:
         print(f"Chyba při spuštění aplikace: {e}")
         sys.exit(1)
