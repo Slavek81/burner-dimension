@@ -37,13 +37,10 @@ try:
     from pressure_losses import PressureLossCalculator
     from visualization import BurnerVisualization
 except ImportError as e:
-    import tkinter as tk
-    from tkinter import messagebox
-    
     # Create minimal root window for error dialog
     error_root = tk.Tk()
     error_root.withdraw()  # Hide the main window
-    
+
     error_message = (
         f"Chyba při načítání výpočetních modulů:\n\n{e}\n\n"
         "Možné příčiny:\n"
@@ -55,7 +52,7 @@ except ImportError as e:
         "• Nainstalujte požadované závislosti: pip install numpy pandas matplotlib\n"
         "• Spusťte aplikaci z hlavního adresáře projektu"
     )
-    
+
     messagebox.showerror("Chyba při spuštění aplikace", error_message)
     error_root.destroy()
     sys.exit(1)
