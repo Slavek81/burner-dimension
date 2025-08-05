@@ -222,12 +222,7 @@ class BurnerCalculatorGUI:
         self.input_vars["max_chamber_temp"] = ttk.Entry(chamber_frame)
         self.input_vars["max_chamber_temp"].grid(row=1, column=1, sticky="ew", padx=(10, 0))
 
-        # Heat release density
-        ttk.Label(chamber_frame, text="Hustota tepelného toku [kW/m²]:").grid(
-            row=2, column=0, sticky="w"
-        )
-        self.input_vars["heat_release_density"] = ttk.Entry(chamber_frame)
-        self.input_vars["heat_release_density"].grid(row=2, column=1, sticky="ew", padx=(10, 0))
+        # Note: Heat release density is calculated automatically in burner design
 
         # Configure column weights
         for frame in [fuel_frame, flow_frame, conditions_frame, burner_frame, chamber_frame]:
@@ -362,7 +357,6 @@ class BurnerCalculatorGUI:
             "supply_pressure": "3000",
             "heat_output": "500",
             "max_chamber_temp": "1200",
-            "heat_release_density": "800",
         }
 
         for key, value in defaults.items():
@@ -429,9 +423,6 @@ class BurnerCalculatorGUI:
             if self.input_data["heat_output"] <= 0:
                 self.validation_errors.append("Požadovaný tepelný výkon musí být větší než nula")
 
-            # Validate heat release density
-            if self.input_data["heat_release_density"] <= 0:
-                self.validation_errors.append("Hustota tepelného toku musí být větší než nula")
 
         except ValueError as e:
             self.validation_errors.append(f"Chyba při převodu číselných hodnot: {e}")
@@ -464,7 +455,6 @@ class BurnerCalculatorGUI:
             "supply_pressure",
             "heat_output",
             "max_chamber_temp",
-            "heat_release_density",
         ]
 
         for field in numeric_fields:
@@ -677,7 +667,7 @@ class BurnerCalculatorGUI:
         text += f"Tlakový spád na hořáku: {results.burner_pressure_drop:.0f} Pa\n"
         text += f"Požadovaný přítlak plynu: {results.required_supply_pressure:.0f} Pa\n\n"
 
-        text += f"Hustota tepelného toku: {results.heat_release_density/1000:.0f} kW/m²\n"
+        text += f"Hustota tepelného toku: {results.volume_heat_release_rate/1000:.0f} kW/m²\n"
 
         self.burner_text.delete(1.0, tk.END)
         self.burner_text.insert(1.0, text)
@@ -698,7 +688,7 @@ class BurnerCalculatorGUI:
         text += f"({results.chamber_wall_temperature-273.15:.1f} °C)\n"
         text += f"Doba zdržení: {results.residence_time:.3f} s\n\n"
 
-        text += f"Hustota tepelného toku: {results.heat_release_density/1000:.0f} kW/m³\n"
+        text += f"Hustota tepelného toku: {results.volume_heat_release_rate/1000:.0f} kW/m³\n"
         text += f"Součinitel přestupu tepla: {results.heat_transfer_coefficient:.1f} W/(m²·K)\n"
 
         self.chamber_text.delete(1.0, tk.END)
