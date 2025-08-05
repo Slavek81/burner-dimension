@@ -8,19 +8,20 @@ Script to demonstrate how the GUI would look when running.
 Creates a mockup description of the visual interface.
 """
 
+
 def describe_gui_appearance():
     """Describe how the GUI looks and functions."""
-    
+
     print("VIZUÁLNÍ POPIS GUI APLIKACE")
     print("=" * 50)
     print()
-    
+
     print("📱 HLAVNÍ OKNO:")
     print("- Velikost: 1200x800 pixelů (přizpůsobitelná)")
     print("- Název: 'Návrh plynového hořáku a spalovací komory'")
     print("- Moderní vzhled s GTK/Windows nativním témem")
     print()
-    
+
     print("📑 ZÁLOŽKY (Notebook widget):")
     tabs = [
         ("Vstupní parametry", "Formulář s 10 vstupními poli ve skupinách"),
@@ -29,17 +30,17 @@ def describe_gui_appearance():
         ("Návrh komory", "Parametry spalovací komory"),
         ("Radiační přenos", "Výpočty tepelného záření"),
         ("Tlakové ztráty", "Analýza tlakových ztrát systému"),
-        ("Výsledky", "Souhrnný report všech výpočtů")
+        ("Výsledky", "Souhrnný report všech výpočtů"),
     ]
-    
+
     for i, (name, desc) in enumerate(tabs, 1):
         print(f"  {i}. {name:20} - {desc}")
     print()
-    
+
     print("🎛️ VSTUPNÍ FORMULÁŘ:")
     print("┌─ Palivo ──────────────────────────────┐")
     print("│ Typ paliva: [Dropdown] natural_gas ▼  │")
-    print("├─ Průtoky ─────────────────────────────┤")  
+    print("├─ Průtoky ─────────────────────────────┤")
     print("│ Hmotnostní průtok [kg/s]: [0.01     ] │")
     print("│ Koeficient přebytku [-]:  [1.2      ] │")
     print("├─ Provozní podmínky ───────────────────┤")
@@ -54,14 +55,14 @@ def describe_gui_appearance():
     print("│ Hustota toku [kW/m²]:     [800      ] │")
     print("└───────────────────────────────────────┘")
     print()
-    
+
     print("🔘 TLAČÍTKA (spodní panel):")
     print("┌─────────────────────────────────────────────────────────┐")
     print("│ [████████████████████] 🔄 Progress                      │")
     print("│                      [Načíst] [Uložit] [Export] [▶ Výpočet] │")
     print("└─────────────────────────────────────────────────────────┘")
     print()
-    
+
     print("📊 VÝSLEDKY (ukázka záložky):")
     print("┌─ VÝSLEDKY VÝPOČTU SPALOVÁNÍ ──────────────────────────┐")
     print("│                                                        │")
@@ -80,7 +81,7 @@ def describe_gui_appearance():
     print("│                                                        │")
     print("└────────────────────────────────────────────────────────┘")
     print()
-    
+
     print("⚠️ CHYBOVÉ HLÁŠKY:")
     print("┌─ Chyby ve vstupních datech ─────────────────────────┐")
     print("│                                                      │")
@@ -93,12 +94,12 @@ def describe_gui_appearance():
     print("│                                    [OK]              │")
     print("└──────────────────────────────────────────────────────┘")
     print()
-    
+
     print("💾 EXPORT DIALOG:")
     print("┌─ Export výsledků ────────────────────────────────────┐")
     print("│                                                      │")
     print("│ Formát exportu:                                      │")
-    print("│ ○ TXT soubor                                        │") 
+    print("│ ○ TXT soubor                                        │")
     print("│ ● CSV soubor                                        │")
     print("│ ○ Excel soubor                                      │")
     print("│                                                      │")
@@ -110,7 +111,7 @@ def describe_gui_appearance():
     print("│                           [Zrušit] [Exportovat]     │")
     print("└──────────────────────────────────────────────────────┘")
     print()
-    
+
     print("🎨 BAREVNÉ SCHÉMA:")
     print("- Pozadí: Světle šedá/bílá (systémové)")
     print("- Tlačítka: Modré akcenty pro primární akce")
@@ -119,7 +120,7 @@ def describe_gui_appearance():
     print("- Úspěch: Zelené značky")
     print("- Progress: Modrý gradient")
     print()
-    
+
     print("🔧 INTERAKTIVNÍ PRVKY:")
     print("- Dropdown pro výběr paliva")
     print("- Entry fields s validací při psaní")
@@ -128,14 +129,14 @@ def describe_gui_appearance():
     print("- Scrollable textové oblasti pro výsledky")
     print("- Resizable okno s minimální velikostí")
     print()
-    
+
     print("📱 RESPONSIVNÍ DESIGN:")
     print("- Minimální velikost: 1000x600 px")
     print("- Přizpůsobitelné panely")
     print("- Scroll v dlouhých výsledcích")
     print("- Grid layout s váhami")
     print()
-    
+
     print("✨ UX FUNKCE:")
     print("- Automatické načtení výchozích hodnot")
     print("- Klávetové zkratky (Ctrl+O, Ctrl+S)")

@@ -266,7 +266,9 @@ class TestBurnerDesigner(unittest.TestCase):
         self.assertGreaterEqual(flame_length, min_expected)
         self.assertLessEqual(flame_length, max_expected)
 
-    @unittest.skip("Skipping due to heat density calculation issue - needs design review")
+    @unittest.skip(
+        "Skipping due to heat density calculation issue - needs design review"
+    )
     def test_velocity_limits_enforcement(self):
         """Test that velocity limits are properly enforced."""
         data_path = os.path.join(os.path.dirname(__file__), "..", "data", "fuels.json")

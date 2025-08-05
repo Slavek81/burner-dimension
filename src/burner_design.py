@@ -128,7 +128,9 @@ class BurnerDesigner:
         air_density = 1.225  # kg/m³ at 20°C, 1 atm
 
         # Weighted average density based on mass fractions
-        total_mass = combustion_results.fuel_flow_rate + combustion_results.air_flow_rate
+        total_mass = (
+            combustion_results.fuel_flow_rate + combustion_results.air_flow_rate
+        )
         fuel_fraction = combustion_results.fuel_flow_rate / total_mass
         air_fraction = combustion_results.air_flow_rate / total_mass
 
@@ -148,7 +150,9 @@ class BurnerDesigner:
 
         # Calculate burner area and diameter based on total gas flow (fuel + air)
         # Total mass flow rate = fuel + air
-        total_mass_flow_rate = combustion_results.fuel_flow_rate + combustion_results.air_flow_rate
+        total_mass_flow_rate = (
+            combustion_results.fuel_flow_rate + combustion_results.air_flow_rate
+        )
 
         # Calculate volume flow rate at burner conditions
         volume_flow_rate = total_mass_flow_rate / gas_density

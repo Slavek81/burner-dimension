@@ -12,7 +12,7 @@ import sys
 import os
 
 # Add src directory to path
-sys.path.insert(0, os.path.join(os.getcwd(), 'src'))
+sys.path.insert(0, os.path.join(os.getcwd(), "src"))
 
 
 def demo_gui_functionality():
@@ -45,7 +45,7 @@ def demo_gui_functionality():
         "Návrh komory",
         "Radiační přenos",
         "Tlakové ztráty",
-        "Výsledky"
+        "Výsledky",
     ]
 
     for i, tab in enumerate(tabs, 1):
@@ -66,7 +66,7 @@ def demo_gui_functionality():
         "heat_output": 500,
         "max_chamber_temp": 1200,
         # High density to reduce residence time
-        "heat_release_density": 2000
+        "heat_release_density": 2000,
     }
 
     for key, value in sample_input.items():
@@ -90,23 +90,27 @@ def demo_gui_functionality():
         # Simulate combustion calculation
         print("🔥 Výpočet spalování...")
         combustion_results = combustion_calc.calculate_combustion_products(
-            sample_input['fuel_type'],
-            sample_input['fuel_flow_rate'],
-            sample_input['excess_air_ratio']
+            sample_input["fuel_type"],
+            sample_input["fuel_flow_rate"],
+            sample_input["excess_air_ratio"],
         )
-        print(f"   - Hmotnostní průtok vzduchu: {combustion_results.air_flow_rate:.6f} kg/s")
-        print(f"   - Teplota plamene: "
-              f"{combustion_results.adiabatic_flame_temperature-273.15:.0f} °C")
+        print(
+            f"   - Hmotnostní průtok vzduchu: {combustion_results.air_flow_rate:.6f} kg/s"
+        )
+        print(
+            f"   - Teplota plamene: "
+            f"{combustion_results.adiabatic_flame_temperature-273.15:.0f} °C"
+        )
         print(f"   - Tepelný výkon: {combustion_results.heat_release_rate/1000:.1f} kW")
 
         # Simulate burner calculation
         print("🔧 Návrh hořáku...")
         burner_results = burner_calc.design_burner(
-            sample_input['fuel_type'],
+            sample_input["fuel_type"],
             combustion_results.heat_release_rate,
-            sample_input['supply_pressure'],
-            sample_input['max_gas_velocity'],
-            sample_input['excess_air_ratio']
+            sample_input["supply_pressure"],
+            sample_input["max_gas_velocity"],
+            sample_input["excess_air_ratio"],
         )
         print(f"   - Průměr hořáku: {burner_results.burner_diameter*1000:.1f} mm")
         print(f"   - Rychlost plynu: {burner_results.gas_velocity:.1f} m/s")
@@ -115,38 +119,43 @@ def demo_gui_functionality():
         print("🏭 Návrh spalovací komory...")
         try:
             chamber_results = chamber_calc.design_chamber(
-                sample_input['heat_output'] * 1000,
-                sample_input['max_chamber_temp'] + 273.15,
-                sample_input['heat_release_density'] * 1000
+                sample_input["heat_output"] * 1000,
+                sample_input["max_chamber_temp"] + 273.15,
+                sample_input["heat_release_density"] * 1000,
             )
             print(f"   - Objem komory: {chamber_results.chamber_volume:.3f} m³")
-            print(f"   - Rozměry: ⌀{chamber_results.chamber_diameter*1000:.0f} × "
-                  f"{chamber_results.chamber_length*1000:.0f} mm")
+            print(
+                f"   - Rozměry: ⌀{chamber_results.chamber_diameter*1000:.0f} × "
+                f"{chamber_results.chamber_length*1000:.0f} mm"
+            )
 
             # Simulate radiation calculation
             print("🌡️ Výpočet radiačního přenosu...")
             radiation_results = radiation_calc.calculate_radiation_transfer(
                 combustion_results.adiabatic_flame_temperature,
                 chamber_results.chamber_wall_temperature,
-                chamber_results.chamber_volume
+                chamber_results.chamber_volume,
             )
-            print(f"   - Radiační tepelný tok: "
-                  f"{radiation_results.total_heat_transfer/1000:.1f} kW")
+            print(
+                f"   - Radiační tepelný tok: "
+                f"{radiation_results.total_heat_transfer/1000:.1f} kW"
+            )
 
             # Simulate pressure calculation
             print("💨 Výpočet tlakových ztrát...")
             pressure_results = pressure_calc.calculate_system_pressure_losses(
                 combustion_results.flue_gas_flow_rate,
                 burner_results.burner_diameter,
-                chamber_results.chamber_length
+                chamber_results.chamber_length,
             )
-            print(f"   - Celková tlaková ztráta: "
-                  f"{pressure_results.total_pressure_loss:.0f} Pa")
+            print(
+                f"   - Celková tlaková ztráta: "
+                f"{pressure_results.total_pressure_loss:.0f} Pa"
+            )
 
         except ValueError as e:
             print(f"   ⚠️  Validační chyba (očekávané chování): {e}")
-            print("   - GUI zobrazí tuto chybu uživateli a umožní úpravu "
-                  "parametrů")
+            print("   - GUI zobrazí tuto chybu uživateli a umožní úpravu " "parametrů")
 
         print()
         print("✅ Všechny výpočty dokončeny úspěšně!")
@@ -154,6 +163,7 @@ def demo_gui_functionality():
     except Exception as e:
         print(f"❌ Chyba při výpočtu: {e}")
         import traceback
+
         traceback.print_exc()
 
     print()
@@ -168,7 +178,7 @@ def demo_gui_functionality():
         "✓ Profesionální vzhled s proper layout",
         "✓ Obsluha chyb a informační dialogy",
         "✓ Podrobné zobrazení všech výsledků",
-        "✓ Spustitelnost bez Claude Code"
+        "✓ Spustitelnost bez Claude Code",
     ]
 
     for feature in features:

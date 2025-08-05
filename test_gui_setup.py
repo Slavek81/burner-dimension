@@ -18,11 +18,12 @@ def test_gui_setup():
     print("=" * 40)
 
     # Add src to path
-    sys.path.insert(0, os.path.join(os.getcwd(), 'src'))
+    sys.path.insert(0, os.path.join(os.getcwd(), "src"))
 
     try:
         # Test tkinter availability
         import tkinter as tk
+
         print("✓ Tkinter dostupný")
 
         # Test calculation modules
@@ -31,10 +32,12 @@ def test_gui_setup():
         from chamber_design import ChamberDesigner
         from radiation import RadiationCalculator
         from pressure_losses import PressureLossCalculator
+
         print("✓ Všechny výpočetní moduly")
 
         # Test GUI module
         from gui.gui import BurnerCalculatorGUI
+
         print("✓ GUI modul")
 
         # Test GUI initialization (without mainloop)
@@ -64,6 +67,7 @@ def test_gui_setup():
     except Exception as e:
         print(f"✗ Neočekávaná chyba: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
