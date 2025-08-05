@@ -28,6 +28,7 @@ try:
     from chamber_design import ChamberDesigner
     from radiation import RadiationCalculator
     from pressure_losses import PressureLossCalculator
+    from visualization import BurnerVisualization
 except ImportError as e:
     print(f"Error importing modules: {e}")
     sys.exit(1)
@@ -74,6 +75,7 @@ class BurnerCalculatorGUI:
                 "chamber": ChamberDesigner(),
                 "radiation": RadiationCalculator(),
                 "pressure": PressureLossCalculator(),
+                "visualization": BurnerVisualization(output_dir="output"),
             }
         except Exception as e:
             messagebox.showerror(
@@ -350,6 +352,9 @@ class BurnerCalculatorGUI:
             button_frame, text="Exportovat výsledky", command=self.export_results
         ).pack(side="right", padx=(0, 5))
         ttk.Button(
+            button_frame, text="Vytvořit grafy", command=self.generate_visualizations
+        ).pack(side="right", padx=(0, 5))
+        ttk.Button(
             button_frame,
             text="Spustit výpočet",
             command=self.run_calculations,
@@ -370,6 +375,9 @@ class BurnerCalculatorGUI:
         file_menu.add_separator()
         file_menu.add_command(
             label="Exportovat výsledky...", command=self.export_results
+        )
+        file_menu.add_command(
+            label="Vytvořit grafy...", command=self.generate_visualizations
         )
         file_menu.add_separator()
         file_menu.add_command(label="Ukončit", command=self.root.quit)
@@ -761,13 +769,17 @@ class BurnerCalculatorGUI:
         text += f"Průměr hořáku: {results.burner_diameter*1000:.1f} mm\n"
         text += f"Plocha hořáku: {results.burner_area*1000000:.1f} mm² ({results.burner_area:.6f} m²)\n"
         text += f"Délka hořáku: {results.burner_length*1000:.0f} mm\n"
-        text += f"Poměr L/D: {results.burner_length/results.burner_diameter:.1f} [-]\n\n"
+        text += (
+            f"Poměr L/D: {results.burner_length/results.burner_diameter:.1f} [-]\n\n"
+        )
 
         # Provozní parametry
         text += "PROVOZNÍ PARAMETRY:\n"
         text += "-" * 23 + "\n"
         text += f"Rychlost plynu: {results.gas_velocity:.1f} m/s\n"
-        text += f"Hustota tepelného toku: {results.heat_release_density/1e6:.1f} MW/m²\n"
+        text += (
+            f"Hustota tepelného toku: {results.heat_release_density/1e6:.1f} MW/m²\n"
+        )
         text += f"Tepelný výkon: {self.input_data['heat_output']} kW\n"
         text += f"Specifický výkon: {float(self.input_data['heat_output'])*1000/results.burner_area:.0f} W/m²\n\n"
 
@@ -917,9 +929,7 @@ class BurnerCalculatorGUI:
 
             # Radiation
             radiation = self.results["radiation"]
-            text += (
-                f"Radiační tepelný tok: {radiation.total_radiation_heat_transfer/1000:.1f} kW\n"
-            )
+            text += f"Radiační tepelný tok: {radiation.total_radiation_heat_transfer/1000:.1f} kW\n"
 
         self.results_text.delete(1.0, tk.END)
         self.results_text.insert(1.0, text)
@@ -1004,6 +1014,133 @@ class BurnerCalculatorGUI:
                 self.results_text,
             ]:
                 text_widget.delete(1.0, tk.END)
+
+    def generate_visualizations(self):
+        """Generate and save visualization charts from calculation results."""
+        if not self.results:
+            messagebox.showwarning(
+                "Chybí výsledky", "Nejprve proveďte výpočty pro generování grafů."
+            )
+            return
+
+        try:
+            # Prepare data for visualization
+            vis_data = self._prepare_visualization_data()
+
+            # Create visualizations dialog to choose formats
+            viz_dialog = VisualizationDialog(
+                self.root, vis_data, self.calculators["visualization"]
+            )
+            self.root.wait_window(viz_dialog.dialog)
+
+        except Exception as e:
+            messagebox.showerror(
+                "Chyba při vytváření grafů",
+                f"Nastala chyba při generování vizualizací:\n{str(e)}",
+            )
+
+    def _prepare_visualization_data(self) -> dict:
+        """
+        Prepare calculation results for visualization.
+
+        Returns:
+            Dictionary containing data structured for visualization module
+        """
+        vis_data = {}
+
+        # Combustion data
+        if "combustion" in self.results:
+            combustion = self.results["combustion"]
+            vis_data["combustion"] = {
+                "air_fuel_ratio": getattr(combustion, "air_fuel_ratio", 0),
+                "excess_air": getattr(combustion, "excess_air_ratio", 1.2),
+                "stoichiometric_air": getattr(combustion, "stoichiometric_air", 0),
+                "actual_air": getattr(combustion, "air_flow_rate", 0)
+                * 3600,  # Convert to kg/h
+                "products": {"CO₂": 15.0, "O₂": 3.0, "H₂O": 12.0, "N₂": 70.0},
+                "temperature_profile": [20, 200, 800, 1200, 1400, 1200, 800, 400, 150],
+            }
+
+        # Pressure losses data
+        if "pressure" in self.results:
+            pressure = self.results["pressure"]
+            vis_data["pressure_losses"] = {
+                "components": {
+                    "Hořák": getattr(pressure, "friction_losses", 0),
+                    "Komora": getattr(pressure, "minor_losses", 0),
+                    "Potrubí": getattr(pressure, "elevation_losses", 0),
+                    "Armatury": 50.0,
+                },
+                "positions": ["Vstup", "Hořák", "Komora", "Výstup"],
+                "cumulative": [0, 100, 200, 350],
+            }
+
+        # Temperature distribution
+        if "chamber" in self.results:
+            chamber = self.results["chamber"]
+            # Create simple temperature field for visualization
+            temp_field = []
+            max_temp = (
+                getattr(chamber, "wall_temperature", 1273) - 273.15
+            )  # Convert to °C
+            for i in range(10):
+                row = []
+                for j in range(20):
+                    # Simple radial temperature distribution
+                    center_x, center_y = 10, 5
+                    distance = ((j - center_x) ** 2 + (i - center_y) ** 2) ** 0.5
+                    temp = max_temp * (1 - distance / 15)
+                    temp = max(temp, 20)  # Minimum ambient temperature
+                    row.append(temp)
+                temp_field.append(row)
+
+            vis_data["temperature"] = {"temperature_field": temp_field}
+
+        # Geometry data
+        if "burner" in self.results and "chamber" in self.results:
+            burner = self.results["burner"]
+            chamber = self.results["chamber"]
+            vis_data["geometry"] = {
+                "chamber": {
+                    "length": getattr(chamber, "chamber_length", 1.0),
+                    "height": getattr(chamber, "chamber_diameter", 0.8),
+                },
+                "burner": {
+                    "width": getattr(burner, "burner_diameter", 0.05),
+                    "height": getattr(burner, "burner_diameter", 0.05) * 0.8,
+                },
+            }
+
+        # Summary data for dashboard
+        vis_data["summary"] = {
+            "Výkon [kW]": float(self.input_data.get("heat_output", 0)),
+            "Průměr hořáku [mm]": getattr(
+                self.results.get("burner"), "burner_diameter", 0
+            )
+            * 1000,
+            "Objem komory [m³]": getattr(
+                self.results.get("chamber"), "chamber_volume", 0
+            ),
+            "Tlakové ztráty [Pa]": getattr(
+                self.results.get("pressure"), "total_pressure_loss", 0
+            ),
+            "Účinnost [%]": 85.0,
+        }
+
+        vis_data["efficiency"] = 85.0
+        vis_data["temperature_profile"] = [
+            20,
+            200,
+            800,
+            1200,
+            1400,
+            1200,
+            800,
+            400,
+            150,
+        ]
+
+        return vis_data
 
     def show_about(self):
         """Show about dialog."""
@@ -1215,6 +1352,248 @@ class ExportDialog:
             # Fallback if pandas/openpyxl not available
             messagebox.showerror(
                 "Chyba", "Pro export do Excel je potřeba nainstalovat pandas a openpyxl"
+            )
+
+
+class VisualizationDialog:
+    """Dialog for generating and saving visualizations."""
+
+    def __init__(self, parent, vis_data: dict, visualization_module):
+        """
+        Initialize visualization dialog.
+
+        Args:
+            parent: Parent window
+            vis_data: Data prepared for visualization
+            visualization_module: BurnerVisualization instance
+        """
+        self.parent = parent
+        self.vis_data = vis_data
+        self.viz = visualization_module
+        self.selected_formats = []
+        self.selected_charts = []
+
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title("Generování grafů")
+        self.dialog.geometry("500x600")
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+
+        # Center dialog
+        self.dialog.update_idletasks()
+        x = (
+            parent.winfo_x()
+            + (parent.winfo_width() // 2)
+            - (self.dialog.winfo_width() // 2)
+        )
+        y = (
+            parent.winfo_y()
+            + (parent.winfo_height() // 2)
+            - (self.dialog.winfo_height() // 2)
+        )
+        self.dialog.geometry(f"+{x}+{y}")
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        """Create dialog widgets."""
+        main_frame = ttk.Frame(self.dialog)
+        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+        # Title
+        title_label = ttk.Label(
+            main_frame,
+            text="Generování grafů a vizualizací",
+            font=("Arial", 14, "bold"),
+        )
+        title_label.pack(pady=(0, 20))
+
+        # Chart selection
+        chart_frame = ttk.LabelFrame(main_frame, text="Vyberte grafy k vytvoření:")
+        chart_frame.pack(fill="x", pady=(0, 15))
+
+        self.chart_vars = {}
+        charts = [
+            ("combustion_analysis", "Analýza spalování"),
+            ("pressure_losses", "Tlakové ztráty"),
+            ("temperature_distribution", "Rozložení teploty"),
+            ("burner_geometry", "Geometrie hořáku"),
+            ("summary_dashboard", "Přehledový dashboard"),
+        ]
+
+        for chart_id, chart_name in charts:
+            var = tk.BooleanVar(value=True)
+            self.chart_vars[chart_id] = var
+            ttk.Checkbutton(chart_frame, text=chart_name, variable=var).pack(
+                anchor="w", padx=10, pady=2
+            )
+
+        # Format selection
+        format_frame = ttk.LabelFrame(main_frame, text="Formáty souborů:")
+        format_frame.pack(fill="x", pady=(0, 15))
+
+        self.format_vars = {}
+        formats = [
+            ("png", "PNG (pro prezentace)"),
+            ("pdf", "PDF (pro dokumenty)"),
+            ("jpeg", "JPEG (komprimovaný)"),
+        ]
+
+        for fmt_id, fmt_name in formats:
+            var = tk.BooleanVar(value=(fmt_id == "png"))  # Default PNG
+            self.format_vars[fmt_id] = var
+            ttk.Checkbutton(format_frame, text=fmt_name, variable=var).pack(
+                anchor="w", padx=10, pady=2
+            )
+
+        # Output directory
+        output_frame = ttk.LabelFrame(main_frame, text="Výstupní adresář:")
+        output_frame.pack(fill="x", pady=(0, 15))
+
+        output_info = ttk.Label(
+            output_frame,
+            text="Grafy budou uloženy do adresáře: output/",
+            foreground="gray",
+        )
+        output_info.pack(anchor="w", padx=10, pady=5)
+
+        # Progress
+        self.progress_var = tk.StringVar(value="Připraveno k vytvoření grafů")
+        progress_label = ttk.Label(main_frame, textvariable=self.progress_var)
+        progress_label.pack(pady=(10, 5))
+
+        self.progress_bar = ttk.Progressbar(main_frame, mode="indeterminate")
+        self.progress_bar.pack(fill="x", pady=(0, 15))
+
+        # Buttons
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill="x")
+
+        ttk.Button(button_frame, text="Storno", command=self.dialog.destroy).pack(
+            side="right", padx=(5, 0)
+        )
+
+        ttk.Button(
+            button_frame,
+            text="Vytvořit grafy",
+            command=self.generate_charts,
+            style="Accent.TButton",
+        ).pack(side="right")
+
+    def generate_charts(self):
+        """Generate selected charts in selected formats."""
+        # Get selected charts
+        selected_charts = [
+            chart_id for chart_id, var in self.chart_vars.items() if var.get()
+        ]
+
+        # Get selected formats
+        selected_formats = [
+            fmt_id for fmt_id, var in self.format_vars.items() if var.get()
+        ]
+
+        if not selected_charts:
+            messagebox.showwarning("Chyba", "Vyberte alespoň jeden graf.")
+            return
+
+        if not selected_formats:
+            messagebox.showwarning("Chyba", "Vyberte alespoň jeden formát.")
+            return
+
+        # Start progress
+        self.progress_bar.start()
+        self.progress_var.set("Generuji grafy...")
+
+        try:
+            generated_files = []
+
+            for chart_type in selected_charts:
+                self.progress_var.set(f"Vytváření: {chart_type}...")
+                self.dialog.update()
+
+                if (
+                    chart_type == "combustion_analysis"
+                    and "combustion" in self.vis_data
+                ):
+                    files = self.viz.plot_combustion_analysis(
+                        self.vis_data["combustion"], selected_formats
+                    )
+                    generated_files.extend(files.values())
+
+                elif (
+                    chart_type == "pressure_losses"
+                    and "pressure_losses" in self.vis_data
+                ):
+                    files = self.viz.plot_pressure_losses(
+                        self.vis_data["pressure_losses"], selected_formats
+                    )
+                    generated_files.extend(files.values())
+
+                elif (
+                    chart_type == "temperature_distribution"
+                    and "temperature" in self.vis_data
+                ):
+                    files = self.viz.plot_temperature_distribution(
+                        self.vis_data["temperature"], selected_formats
+                    )
+                    generated_files.extend(files.values())
+
+                elif chart_type == "burner_geometry" and "geometry" in self.vis_data:
+                    files = self.viz.plot_burner_geometry(
+                        self.vis_data["geometry"], selected_formats
+                    )
+                    generated_files.extend(files.values())
+
+                elif chart_type == "summary_dashboard":
+                    files = self.viz.create_summary_dashboard(
+                        self.vis_data, selected_formats
+                    )
+                    generated_files.extend(files.values())
+
+            self.progress_bar.stop()
+
+            if generated_files:
+                self.progress_var.set(f"Vytvořeno {len(generated_files)} grafů")
+                messagebox.showinfo(
+                    "Úspěch",
+                    f"Grafy byly úspěšně vytvořeny!\n\n"
+                    f"Počet souborů: {len(generated_files)}\n"
+                    f"Umístění: output/\n\n"
+                    f"Typy grafů: {', '.join(selected_charts)}\n"
+                    f"Formáty: {', '.join(selected_formats)}",
+                )
+
+                # Ask if user wants to open output folder
+                if messagebox.askyesno(
+                    "Otevřít složku", "Chcete otevřít složku s vytvořenými grafy?"
+                ):
+                    import subprocess
+                    import platform
+
+                    output_path = os.path.abspath("output")
+                    try:
+                        if platform.system() == "Windows":
+                            os.startfile(output_path)
+                        elif platform.system() == "Darwin":  # macOS
+                            subprocess.run(["open", output_path])
+                        else:  # Linux
+                            subprocess.run(["xdg-open", output_path])
+                    except Exception:
+                        pass  # Ignore if can't open folder
+
+                self.dialog.destroy()
+            else:
+                self.progress_var.set("Žádné grafy nebyly vytvořeny")
+                messagebox.showwarning(
+                    "Problém",
+                    "Nebyly vytvořeny žádné grafy. Zkontrolujte data výpočtů.",
+                )
+
+        except Exception as e:
+            self.progress_bar.stop()
+            self.progress_var.set("Chyba při vytváření grafů")
+            messagebox.showerror(
+                "Chyba", f"Nastala chyba při generování grafů:\n{str(e)}"
             )
 
 

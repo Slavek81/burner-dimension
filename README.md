@@ -5,14 +5,17 @@ A comprehensive Python application with GUI for calculating and designing gas bu
 ## 🚀 Features
 
 - **Complete Combustion Analysis** - Stoichiometric calculations, flame temperature, flue gas composition
-- **Burner Design & Dimensioning** - Automated sizing based on power requirements and constraints
+- **Burner Design & Dimensioning** - Automated sizing based on power requirements and constraints  
 - **Combustion Chamber Design** - Volume calculations, heat transfer, residence time optimization
 - **Radiation Heat Transfer** - Stefan-Boltzmann law, view factors, multi-surface exchange
 - **Pressure Loss Analysis** - Friction losses, minor losses, system pressure requirements
 - **Professional GUI** - User-friendly tkinter interface with Czech localization
+- **Detailed Results Display** - Structured output with comprehensive engineering parameters
+- **Auto-switching Interface** - Automatically switches to Results tab after calculations
 - **Multiple Export Formats** - TXT, CSV, Excel reports with detailed calculations
 - **Input Validation** - Comprehensive error checking with meaningful messages
 - **JSON Configuration** - Save/load calculation parameters
+- **Realistic Design Parameters** - Industry-standard limits and safety factors
 
 ## 📋 Requirements
 
@@ -99,10 +102,11 @@ Each fuel includes comprehensive property data:
 
 ### Burner Design (`src/burner_design.py`)
 - Burner diameter and area calculation
-- Gas velocity optimization
+- Gas velocity optimization (5-100 m/s range)
 - Pressure drop across burner
-- Heat release density validation
+- Heat release density validation (up to 150 MW/m²)
 - Flame length estimation
+- Realistic sizing for 100 kW applications (≈49mm diameter)
 
 ### Chamber Design (`src/chamber_design.py`)
 - Chamber volume based on residence time

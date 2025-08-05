@@ -2,11 +2,11 @@
 # Gas Burner and Combustion Chamber Design Calculator
 
 ## Document Information
-- **Document Version**: 1.0.0
+- **Document Version**: 1.1.0
 - **Creation Date**: 2024
-- **Last Updated**: 2024
+- **Last Updated**: January 2025
 - **Product Name**: Gas Burner and Combustion Chamber Design Calculator
-- **Product Version**: 1.0.0
+- **Product Version**: 1.1.0
 
 ## Executive Summary
 
@@ -85,8 +85,10 @@ To provide a reliable, user-friendly tool for calculating and designing gas burn
 
 **Acceptance Criteria**:
 - Supports power ranges from 10 kW to 10 MW
-- Nozzle calculations accurate to 0.1 mm
-- Gas velocity calculations within industry standards
+- Heat release density up to 150 MW/m² for industrial applications
+- Gas velocity optimization within 5-100 m/s range
+- Realistic burner sizing (e.g., 49mm diameter for 100 kW)
+- Automatic design validation and recommendations
 - Provides multiple design alternatives
 
 #### F3: Combustion Chamber Design
@@ -156,6 +158,9 @@ To provide a reliable, user-friendly tool for calculating and designing gas burn
 - F6.4: Progress indicators for long calculations
 - F6.5: Context-sensitive help and tooltips
 - F6.6: Professional appearance with consistent styling
+- F6.7: Automatic tab switching to Results after calculation completion
+- F6.8: Detailed structured output with engineering parameters
+- F6.9: Multi-section results display (geometry, thermal, pressure analysis)
 
 **Acceptance Criteria**:
 - Loads within 3 seconds on standard hardware
