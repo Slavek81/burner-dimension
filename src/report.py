@@ -10,11 +10,10 @@ calculation results, analysis, and recommendations.
 
 import os
 import csv
-import json
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 import pandas as pd
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 
 @dataclass
@@ -137,7 +136,8 @@ class BurnerReportGenerator:
                     combustion = calculation_results["combustion"]
 
                     f.write(
-                        f"Teoretické množství vzduchu: {combustion.get('theoretical_air', 'N/A')} m³/m³\n"
+                        f"Teoretické množství vzduchu: "
+                        f"{combustion.get('theoretical_air', 'N/A')} m³/m³\n"
                     )
                     f.write(
                         f"Skutečné množství vzduchu: {combustion.get('actual_air', 'N/A')} m³/m³\n"
@@ -258,7 +258,6 @@ class BurnerReportGenerator:
 
         try:
             # Flatten calculation results for CSV export
-            flattened_data = []
 
             def flatten_dict(d, parent_key="", sep="_"):
                 """Recursively flatten nested dictionary."""

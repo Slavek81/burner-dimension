@@ -9,7 +9,7 @@ Handles friction losses in pipes, minor losses from fittings, and system pressur
 
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 
 try:
     from .combustion import CombustionCalculator
@@ -586,24 +586,24 @@ def main():
             gas_viscosity=gas_viscosity,
         )
 
-        print(f"Výpočet tlakových ztrát plynového systému:")
+        print("Výpočet tlakových ztrát plynového systému:")
         print(f"Hmotnostní průtok: {mass_flow_rate:.4f} kg/s")
         print(f"Hustota plynu: {gas_density:.2f} kg/m³")
-        print(f"\nTlakové ztráty:")
+        print("\nTlakové ztráty:")
         print(f"Třecí ztráty v potrubí: {results.friction_losses:.0f} Pa")
         print(f"Místní ztráty armatury: {results.minor_losses:.0f} Pa")
         print(f"Výškové ztráty: {results.elevation_losses:.0f} Pa")
         print(f"Ztráty v hořáku: {results.burner_pressure_loss:.0f} Pa")
         print(f"Celkové ztráty: {results.total_pressure_loss:.0f} Pa")
         print(f"Požadovaný přítlak: {results.required_supply_pressure:.0f} Pa")
-        print(f"\nParametry proudění:")
+        print("\nParametry proudění:")
         print(f"Reynoldsovo číslo: {results.reynolds_number:.0f}")
         print(f"Součinitel tření: {results.friction_factor:.4f}")
         print(f"Rychlostní tlak: {results.velocity_pressure:.1f} Pa")
         print(f"Součinitel odporu systému: {results.system_resistance_coefficient:.2f}")
 
         # Test pipe diameter optimization
-        print(f"\nOptimalizace průměru potrubí:")
+        print("\nOptimalizace průměru potrubí:")
         optimization = calc.optimize_pipe_diameter(
             length=15.0,
             mass_flow_rate=mass_flow_rate,

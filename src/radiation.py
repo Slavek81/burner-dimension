@@ -4,21 +4,20 @@
 src/radiation.py
 
 Radiation heat transfer calculations module for gas burner design application.
-Handles Stefan-Boltzmann law applications, view factors, radiation exchange, and material emissivity.
+Handles Stefan-Boltzmann law applications, view factors, radiation
+exchange, and material emissivity.
 """
 
 import math
 import json
 import os
 from dataclasses import dataclass
-from typing import Dict, Tuple, Optional, List
+from typing import Dict, List
 
 try:
     from .combustion import CombustionCalculator
-    from .chamber_design import ChamberDesignResults
 except ImportError:
     from combustion import CombustionCalculator
-    from chamber_design import ChamberDesignResults
 
 
 @dataclass
@@ -543,11 +542,11 @@ def main():
             soot_concentration=0.001,  # kg/m³
         )
 
-        print(f"Výpočet radiace pro spalovací komoru:")
+        print("Výpočet radiace pro spalovací komoru:")
         print(f"Teplota plamene: {flame_temperature-273.15:.0f} °C")
         print(f"Teplota stěny: {wall_temperature-273.15:.0f} °C")
         print(f"Rozměry komory: ⌀{chamber_diameter*1000:.0f} × {chamber_length*1000:.0f} mm")
-        print(f"\nVýsledky radiace:")
+        print("\nVýsledky radiace:")
         print(f"Celkový radiační přenos tepla: {results.total_radiation_heat_transfer/1000:.1f} kW")
         print(f"Přenos z plamene na stěnu: {results.flame_to_wall_heat_transfer/1000:.1f} kW")
         print(f"Přenos ze stěny do okolí: {results.wall_to_ambient_heat_transfer/1000:.1f} kW")
@@ -558,7 +557,7 @@ def main():
         print(f"Střední délka paprsku: {results.mean_beam_length:.3f} m")
 
         # Test material emissivity lookup
-        print(f"\nEmisivity materiálů:")
+        print("\nEmisivity materiálů:")
         materials = ["steel_oxidized", "refractory_brick", "flame_gases", "soot_particles"]
         for material in materials:
             emissivity = calc.get_material_emissivity(material, temperature=1200)

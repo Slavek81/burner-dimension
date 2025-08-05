@@ -9,12 +9,12 @@ Handles burner sizing calculations, pressure requirements, and flow calculations
 
 import math
 from dataclasses import dataclass
-from typing import Dict, Tuple, Optional
+from typing import Dict
 
 try:
-    from .combustion import CombustionCalculator, CombustionResults
+    from .combustion import CombustionCalculator
 except ImportError:
-    from combustion import CombustionCalculator, CombustionResults
+    from combustion import CombustionCalculator
 
 
 @dataclass
@@ -111,7 +111,9 @@ class BurnerDesigner:
         fuel_flow_rate = required_power / fuel_props["lower_heating_value_mass"]
 
         # Calculate combustion properties
-        combustion_results = self.combustion_calc.calculate_combustion_products(
+        # Note: combustion_results currently not used in calculations
+        # but available for future enhancements
+        _ = self.combustion_calc.calculate_combustion_products(
             fuel_type, fuel_flow_rate, excess_air_ratio
         )
 
@@ -385,7 +387,7 @@ def main():
 
         # Validation
         validation = designer.validate_design(results)
-        print(f"\nValidace návrhu:")
+        print("\nValidace návrhu:")
         for criterion, passed in validation.items():
             status = "✓" if passed else "✗"
             print(f"{status} {criterion}: {'Prošlo' if passed else 'Neprošlo'}")
@@ -393,7 +395,7 @@ def main():
         # Recommendations
         recommendations = designer.get_design_recommendations(results)
         if recommendations:
-            print(f"\nDoporučení:")
+            print("\nDoporučení:")
             for i, rec in enumerate(recommendations, 1):
                 print(f"{i}. {rec}")
 

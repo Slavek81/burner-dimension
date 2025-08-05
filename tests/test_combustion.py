@@ -7,14 +7,13 @@ Unit tests for combustion calculation module.
 Tests stoichiometric calculations, air requirements, and combustion products.
 """
 
-import unittest
-import sys
 import os
+import sys
+import unittest
 
-# Add src directory to path for imports
+# Add src directory to path for imports  # noqa: E402
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from combustion import CombustionCalculator
+from combustion import CombustionCalculator  # noqa: E402
 
 
 class TestCombustionCalculator(unittest.TestCase):
@@ -24,87 +23,100 @@ class TestCombustionCalculator(unittest.TestCase):
         """Set up test fixtures."""
         self.calculator = CombustionCalculator()
 
-        # Standard natural gas composition for testing
-        self.natural_gas = {
-            "name": "Natural Gas Test",
-            "heating_value": 35.8,  # MJ/m³
-            "density": 0.717,  # kg/m³
-            "composition": {"CH4": 95.0, "C2H6": 3.0, "C3H8": 1.0, "N2": 1.0},  # %
-        }
+    def test_methane_stoichiometry(self):
+        """Test stoichiometric calculations for methane."""
+        result = self.calculator.calculate_stoichiometry("methane")
 
-    def test_calculator_initialization(self):
-        """Test calculator initializes correctly."""
-        self.assertIsInstance(self.calculator, CombustionCalculator)
+        # Check basic properties
+        self.assertIsInstance(result, dict)
+        self.assertIn("air_fuel_ratio_mass", result)
+        self.assertIn("products_per_fuel_mass", result)
 
-    def test_theoretical_air_calculation(self):
-        """Test theoretical air requirement calculation."""
-        # Test with methane (CH4) - should need 2 m³ air per m³ CH4
-        methane_fuel = {"composition": {"CH4": 100.0}}
+        # Verify methane stoichiometry: CH4 + 2O2 -> CO2 + 2H2O
+        # Theoretical air/fuel ratio for methane ≈ 17.2 kg air/kg fuel
+        self.assertAlmostEqual(result["air_fuel_ratio_mass"], 17.23, places=1)
 
-        # This test assumes the calculate method exists and returns expected structure
-        # In real implementation, verify the actual return format
-        try:
-            result = self.calculator.calculate(methane_fuel, excess_air_ratio=1.0)
-            # Verify result structure exists
-            self.assertIsInstance(result, dict)
-        except (AttributeError, NotImplementedError):
-            # Skip test if method not implemented yet
-            self.skipTest("calculate method not yet implemented")
+    def test_propane_stoichiometry(self):
+        """Test stoichiometric calculations for propane."""
+        result = self.calculator.calculate_stoichiometry("propane")
 
-    def test_excess_air_calculation(self):
-        """Test excess air calculations."""
-        excess_air_ratios = [1.1, 1.2, 1.5, 2.0]
+        # Check basic properties
+        self.assertIsInstance(result, dict)
+        self.assertIn("air_fuel_ratio_mass", result)
 
-        for ratio in excess_air_ratios:
-            with self.subTest(excess_air_ratio=ratio):
-                try:
-                    result = self.calculator.calculate(self.natural_gas, excess_air_ratio=ratio)
-                    # Verify excess air is calculated correctly
-                    expected_excess = (ratio - 1.0) * 100
-                    # This assertion would need to match actual implementation
-                    self.assertIsInstance(result, dict)
-                except (AttributeError, NotImplementedError):
-                    self.skipTest("calculate method not yet implemented")
+        # Theoretical air/fuel ratio for propane ≈ 15.6 kg air/kg fuel
+        self.assertAlmostEqual(result["air_fuel_ratio_mass"], 15.64, places=1)
 
-    def test_invalid_fuel_composition(self):
-        """Test handling of invalid fuel compositions."""
-        invalid_fuels = [
-            {"composition": {}},  # Empty composition
-            {"composition": {"CH4": 0}},  # Zero composition
-            {"composition": {"CH4": 150}},  # Over 100%
-        ]
+    def test_natural_gas_stoichiometry(self):
+        """Test stoichiometric calculations for natural gas."""
+        result = self.calculator.calculate_stoichiometry("natural_gas")
 
-        for invalid_fuel in invalid_fuels:
-            with self.subTest(fuel=invalid_fuel):
-                try:
-                    with self.assertRaises((ValueError, KeyError)):
-                        self.calculator.calculate(invalid_fuel, excess_air_ratio=1.2)
-                except (AttributeError, NotImplementedError):
-                    self.skipTest("calculate method not yet implemented")
+        # Check basic properties
+        self.assertIsInstance(result, dict)
+        self.assertIn("air_fuel_ratio_mass", result)
 
-    def test_fuel_validation(self):
-        """Test fuel data validation."""
-        # Test missing required fields
-        incomplete_fuel = {"name": "Test Fuel"}
-
-        try:
-            with self.assertRaises((ValueError, KeyError)):
-                self.calculator.calculate(incomplete_fuel, excess_air_ratio=1.2)
-        except (AttributeError, NotImplementedError):
-            self.skipTest("calculate method not yet implemented")
+        # Natural gas is mostly methane, so similar ratio
+        self.assertAlmostEqual(result["air_fuel_ratio_mass"], 16.5, delta=1.0)
 
     def test_combustion_products(self):
         """Test combustion products calculation."""
-        try:
-            result = self.calculator.calculate(self.natural_gas, excess_air_ratio=1.2)
+        result = self.calculator.calculate_combustion_products(
+            fuel_type="methane", fuel_flow_rate=0.1, excess_air_ratio=1.1
+        )
 
-            # Verify CO2, H2O, N2, O2 are in products
-            if "products" in result:
-                expected_products = ["CO2", "H2O", "N2", "O2"]
-                for product in expected_products:
-                    self.assertIn(product, result["products"])
-        except (AttributeError, NotImplementedError):
-            self.skipTest("calculate method not yet implemented")
+        # Check result structure
+        self.assertIsInstance(result, object)
+        self.assertTrue(hasattr(result, "fuel_flow_rate"))
+        self.assertTrue(hasattr(result, "air_flow_rate"))
+        self.assertTrue(hasattr(result, "products_flow_rate"))
+
+        # Check values
+        self.assertEqual(result.fuel_flow_rate, 0.1)
+        self.assertGreater(result.air_flow_rate, 0)
+        self.assertGreater(result.products_flow_rate, 0)
+
+    def test_temperature_calculation(self):
+        """Test adiabatic flame temperature calculation."""
+        temperature = self.calculator.calculate_adiabatic_temperature(
+            "methane", excess_air_ratio=1.0
+        )
+
+        # Methane adiabatic flame temperature should be ~2220K (1950°C)
+        self.assertGreater(temperature, 2000)  # K
+        self.assertLess(temperature, 2500)  # K
+
+    def test_invalid_fuel_type(self):
+        """Test handling of invalid fuel type."""
+        with self.assertRaises(ValueError):
+            self.calculator.calculate_stoichiometry("invalid_fuel")
+
+    def test_excess_air_validation(self):
+        """Test validation of excess air ratio."""
+        # Test minimum excess air ratio
+        with self.assertRaises(ValueError):
+            self.calculator.calculate_combustion_products(
+                "methane", 0.1, excess_air_ratio=0.8
+            )
+
+        # Test maximum excess air ratio
+        with self.assertRaises(ValueError):
+            self.calculator.calculate_combustion_products(
+                "methane", 0.1, excess_air_ratio=5.0
+            )
+
+    def test_fuel_flow_rate_validation(self):
+        """Test validation of fuel flow rate."""
+        # Test negative flow rate
+        with self.assertRaises(ValueError):
+            self.calculator.calculate_combustion_products(
+                "methane", -0.1, excess_air_ratio=1.1
+            )
+
+        # Test zero flow rate
+        with self.assertRaises(ValueError):
+            self.calculator.calculate_combustion_products(
+                "methane", 0.0, excess_air_ratio=1.1
+            )
 
 
 if __name__ == "__main__":

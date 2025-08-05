@@ -7,16 +7,15 @@ Unit tests for report generation module.
 Tests text, CSV, and Excel report generation functionality.
 """
 
-import unittest
-import sys
 import os
-import tempfile
 import shutil
+import sys
+import tempfile
+import unittest
 
-# Add src directory to path for imports
+# Add src directory to path for imports  # noqa: E402
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from report import BurnerReportGenerator, CalculationMetadata
+from report import BurnerReportGenerator, CalculationMetadata  # noqa: E402
 
 
 class TestBurnerReportGenerator(unittest.TestCase):
@@ -24,209 +23,193 @@ class TestBurnerReportGenerator(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        # Create temporary directory for test outputs
         self.temp_dir = tempfile.mkdtemp()
-        self.report_gen = BurnerReportGenerator(output_dir=self.temp_dir)
+        self.generator = BurnerReportGenerator()
 
-        # Sample calculation results for testing
+        # Create sample data
+        self.metadata = CalculationMetadata(
+            fuel_type="methane",
+            required_power=100000,  # 100 kW
+            excess_air_ratio=1.1,
+            supply_pressure=3000,  # Pa
+            calculation_date="2024-01-15 10:30:00",
+            software_version="1.0.0",
+        )
+
+        # Mock calculation results
         self.sample_results = {
-            "inputs": {
-                "fuel_type": "Natural Gas",
-                "power": 100,  # kW
-                "excess_air_ratio": 1.2,
-                "operating_temp": 850,  # °C
-            },
-            "combustion": {
-                "theoretical_air": 9.52,
-                "actual_air": 11.42,
-                "excess_air": 20.0,
-                "heating_value": 35.8,
-                "combustion_temp": 1850,
-                "products": {"CO2": 8.5, "H2O": 16.8, "N2": 71.2, "O2": 3.5},
-            },
-            "burner": {
-                "type": "Low NOx",
-                "power": 100,
-                "nozzle_diameter": 8.5,
-                "gas_velocity": 25.0,
-                "gas_pressure": 2500,
-            },
-            "chamber": {
-                "volume": 2.5,
-                "length": 2.0,
-                "diameter": 1.2,
-                "residence_time": 0.85,
-                "heat_loading": 40,
-            },
-            "radiation": {
-                "heat_flux": 85.5,
-                "gas_emissivity": 0.25,
-                "wall_emissivity": 0.85,
-                "radiation_efficiency": 78.5,
-            },
-            "pressure_losses": {
-                "components": {"Burner": 50.0, "Chamber": 30.0, "Ducting": 20.0, "Stack": 15.0}
-            },
-            "efficiency": 82.5,
-            "emissions": {"NOx": 45.2, "CO": 12.5, "CO2": 195.8},
+            "burner_diameter": 0.050,  # m
+            "burner_area": 0.00196,  # m²
+            "gas_velocity": 25.0,  # m/s
+            "burner_pressure_drop": 250,  # Pa
+            "heat_release_density": 50e6,  # W/m²
+            "chamber_volume": 0.025,  # m³
+            "residence_time": 0.15,  # s
+            "flame_temperature": 2100,  # K
+            "thermal_efficiency": 85.0,  # %
         }
 
     def tearDown(self):
         """Clean up test fixtures."""
-        # Remove temporary directory
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        shutil.rmtree(self.temp_dir)
 
-    def test_report_generator_initialization(self):
-        """Test report generator initializes correctly."""
-        self.assertIsInstance(self.report_gen, BurnerReportGenerator)
-        self.assertEqual(self.report_gen.output_dir, self.temp_dir)
-        self.assertTrue(os.path.exists(self.temp_dir))
+    def test_generate_text_report(self):
+        """Test text report generation."""
+        output_file = os.path.join(self.temp_dir, "test_report.txt")
 
-    def test_metadata_setting(self):
-        """Test setting calculation metadata."""
-        self.report_gen.set_metadata(
-            project_name="Test Project", user_name="Test User", software_version="1.0.0"
+        # Generate report
+        self.generator.generate_text_report(
+            metadata=self.metadata,
+            results=self.sample_results,
+            output_file=output_file,
         )
 
-        metadata = self.report_gen.report_metadata
-        self.assertIsInstance(metadata, CalculationMetadata)
-        self.assertEqual(metadata.project_name, "Test Project")
-        self.assertEqual(metadata.user_name, "Test User")
-        self.assertEqual(metadata.software_version, "1.0.0")
-        self.assertIsNotNone(metadata.calculation_id)
-        self.assertIsNotNone(metadata.timestamp)
+        # Check file was created
+        self.assertTrue(os.path.exists(output_file))
 
-    def test_text_report_generation(self):
-        """Test text report generation."""
-        self.report_gen.set_metadata(project_name="Test Project")
-
-        report_path = self.report_gen.generate_text_report(self.sample_results)
-
-        # Verify file was created
-        self.assertTrue(os.path.exists(report_path))
-
-        # Verify file content
-        with open(report_path, "r", encoding="utf-8") as f:
+        # Check content
+        with open(output_file, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Check for key sections
-        self.assertIn("ZPRÁVA O VÝPOČTU", content)
-        self.assertIn("VSTUPNÍ PARAMETRY", content)
-        self.assertIn("ANALÝZA SPALOVÁNÍ", content)
-        self.assertIn("NÁVRH HOŘÁKU", content)
-        self.assertIn("Test Project", content)
+        self.assertIn("PROTOKOL VÝPOČTU HOŘÁKU", content)
+        self.assertIn("methane", content)
+        self.assertIn("100.0 kW", content)
+        self.assertIn("50.0 mm", content)  # diameter in mm
 
-    def test_csv_export_generation(self):
-        """Test CSV export generation."""
-        csv_path = self.report_gen.generate_csv_export(self.sample_results)
+    def test_generate_csv_report(self):
+        """Test CSV report generation."""
+        output_file = os.path.join(self.temp_dir, "test_report.csv")
 
-        # Verify file was created
-        self.assertTrue(os.path.exists(csv_path))
-
-        # Verify file content structure
-        with open(csv_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-
-        # Should have header and data rows
-        self.assertGreater(len(lines), 1)
-
-        # Check header format
-        header = lines[0].strip()
-        expected_columns = ["Parametr", "Hodnota", "Jednotka", "Kategorie"]
-        for col in expected_columns:
-            self.assertIn(col, header)
-
-    def test_excel_report_generation(self):
-        """Test Excel report generation."""
-        try:
-            import pandas as pd
-
-            excel_path = self.report_gen.generate_excel_report(self.sample_results)
-
-            # Verify file was created
-            self.assertTrue(os.path.exists(excel_path))
-
-            # Verify file can be read
-            excel_file = pd.ExcelFile(excel_path)
-            sheet_names = excel_file.sheet_names
-
-            # Should have multiple sheets
-            expected_sheets = ["Shrnutí", "Vstupní parametry"]
-            for sheet in expected_sheets:
-                if sheet in sheet_names:  # Some sheets might be conditional
-                    df = pd.read_excel(excel_path, sheet_name=sheet)
-                    self.assertFalse(df.empty)
-
-        except ImportError:
-            self.skipTest("pandas or openpyxl not available for Excel testing")
-
-    def test_complete_report_generation(self):
-        """Test complete report generation in all formats."""
-        generated_files = self.report_gen.generate_complete_report(
-            self.sample_results,
-            formats=["txt", "csv"],  # Skip xlsx if pandas not available
-            project_name="Complete Test Project",
-            user_name="Test User",
+        # Generate report
+        self.generator.generate_csv_report(
+            metadata=self.metadata,
+            results=self.sample_results,
+            output_file=output_file,
         )
 
-        # Verify files were generated
-        self.assertIsInstance(generated_files, dict)
+        # Check file was created
+        self.assertTrue(os.path.exists(output_file))
 
-        # Check each requested format
-        for fmt, filepath in generated_files.items():
-            self.assertTrue(os.path.exists(filepath))
-            # Verify file is not empty
-            self.assertGreater(os.path.getsize(filepath), 0)
+        # Check content
+        with open(output_file, "r", encoding="utf-8") as f:
+            content = f.read()
 
-    def test_unit_determination(self):
-        """Test unit determination for parameters."""
-        # Test various parameter types
-        test_cases = [
-            ("temperature", "value", "°C"),
-            ("pressure_loss", "value", "Pa"),
-            ("power_rating", "value", "kW"),
-            ("gas_velocity", "value", "m/s"),
-            ("chamber_volume", "value", "m³"),
-            ("residence_time", "value", "s"),
-            ("burner_diameter", "value", "m"),
-            ("combustion_efficiency", "value", "%"),
-            ("unknown_param", "value", "-"),
-        ]
+        self.assertIn("Parametr,Hodnota,Jednotka", content)
+        self.assertIn("methane", content)
+        self.assertIn("100.0", content)
 
-        for param_name, value, expected_unit in test_cases:
-            with self.subTest(parameter=param_name):
-                unit = self.report_gen._determine_unit(param_name, value)
-                self.assertEqual(unit, expected_unit)
+    def test_generate_excel_report(self):
+        """Test Excel report generation."""
+        output_file = os.path.join(self.temp_dir, "test_report.xlsx")
+
+        # Generate report
+        self.generator.generate_excel_report(
+            metadata=self.metadata,
+            results=self.sample_results,
+            output_file=output_file,
+        )
+
+        # Check file was created
+        self.assertTrue(os.path.exists(output_file))
+
+        # Check file size (Excel files should not be empty)
+        file_size = os.path.getsize(output_file)
+        self.assertGreater(file_size, 1000)  # Should be at least 1KB
+
+    def test_format_scientific_notation(self):
+        """Test scientific notation formatting."""
+        # Test large numbers
+        result = self.generator._format_number(5e7)
+        self.assertEqual(result, "5.0×10⁷")
+
+        # Test small numbers
+        result = self.generator._format_number(1.5e-3)
+        self.assertEqual(result, "1.5×10⁻³")
+
+        # Test normal numbers
+        result = self.generator._format_number(123.45)
+        self.assertEqual(result, "123.4")
+
+    def test_format_units(self):
+        """Test unit formatting."""
+        # Test power units
+        result = self.generator._format_with_units(100000, "power")
+        self.assertEqual(result, "100.0 kW")
+
+        # Test pressure units
+        result = self.generator._format_with_units(3000, "pressure")
+        self.assertEqual(result, "3000 Pa")
+
+        # Test diameter units
+        result = self.generator._format_with_units(0.050, "diameter")
+        self.assertEqual(result, "50.0 mm")
+
+    def test_validate_results_structure(self):
+        """Test validation of results structure."""
+        # Test valid results
+        is_valid = self.generator._validate_results(self.sample_results)
+        self.assertTrue(is_valid)
+
+        # Test missing required fields
+        incomplete_results = {"burner_diameter": 0.050}
+        is_valid = self.generator._validate_results(incomplete_results)
+        self.assertFalse(is_valid)
+
+        # Test invalid data types
+        invalid_results = self.sample_results.copy()
+        invalid_results["burner_diameter"] = "invalid"
+        is_valid = self.generator._validate_results(invalid_results)
+        self.assertFalse(is_valid)
+
+    def test_file_path_validation(self):
+        """Test file path validation."""
+        # Test invalid directory
+        invalid_path = "/nonexistent/directory/report.txt"
+        with self.assertRaises(ValueError):
+            self.generator.generate_text_report(
+                metadata=self.metadata,
+                results=self.sample_results,
+                output_file=invalid_path,
+            )
 
     def test_empty_results_handling(self):
-        """Test handling of empty or minimal results."""
+        """Test handling of empty results."""
         empty_results = {}
+        output_file = os.path.join(self.temp_dir, "empty_report.txt")
 
-        # Should not crash with empty results
-        report_path = self.report_gen.generate_text_report(empty_results)
-        self.assertTrue(os.path.exists(report_path))
+        with self.assertRaises(ValueError):
+            self.generator.generate_text_report(
+                metadata=self.metadata,
+                results=empty_results,
+                output_file=output_file,
+            )
 
-        csv_path = self.report_gen.generate_csv_export(empty_results)
-        self.assertTrue(os.path.exists(csv_path))
-
-    def test_custom_filename(self):
-        """Test custom filename specification."""
-        custom_name = "custom_report.txt"
-        report_path = self.report_gen.generate_text_report(
-            self.sample_results, filename=custom_name
+    def test_unicode_handling(self):
+        """Test proper Unicode handling in reports."""
+        # Create metadata with Czech characters
+        unicode_metadata = CalculationMetadata(
+            fuel_type="zemní_plyn",
+            required_power=50000,
+            excess_air_ratio=1.2,
+            supply_pressure=2500,
+            calculation_date="2024-01-15 14:30:00",
+            software_version="1.0.0",
         )
 
-        expected_path = os.path.join(self.temp_dir, custom_name)
-        self.assertEqual(report_path, expected_path)
-        self.assertTrue(os.path.exists(expected_path))
+        output_file = os.path.join(self.temp_dir, "unicode_report.txt")
 
-    def test_output_directory_creation(self):
-        """Test automatic output directory creation."""
-        new_dir = os.path.join(self.temp_dir, "new_reports")
-        new_report_gen = BurnerReportGenerator(output_dir=new_dir)
+        # Should not raise encoding errors
+        self.generator.generate_text_report(
+            metadata=unicode_metadata,
+            results=self.sample_results,
+            output_file=output_file,
+        )
 
-        # Directory should be created automatically
-        self.assertTrue(os.path.exists(new_dir))
+        # Check file was created and contains Czech characters
+        self.assertTrue(os.path.exists(output_file))
+        with open(output_file, "r", encoding="utf-8") as f:
+            content = f.read()
+            self.assertIn("zemní_plyn", content)
 
 
 if __name__ == "__main__":

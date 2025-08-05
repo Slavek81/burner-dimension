@@ -11,7 +11,7 @@ and temperature distribution plots.
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 import os
 from datetime import datetime
 
@@ -482,7 +482,7 @@ class BurnerVisualization:
                 emissions = all_data["emissions"]
                 pollutants = list(emissions.keys())
                 concentrations = list(emissions.values())
-                bars = ax7.bar(
+                ax7.bar(
                     pollutants, concentrations, color=["brown", "gray", "purple", "orange"]
                 )
                 ax7.set_title("Emise")

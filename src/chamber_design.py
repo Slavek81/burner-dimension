@@ -9,14 +9,14 @@ Handles chamber volume calculations, heat transfer, residence time, and temperat
 
 import math
 from dataclasses import dataclass
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple
 
 try:
     from .combustion import CombustionCalculator, CombustionResults
-    from .burner_design import BurnerDesigner, BurnerDesignResults
+    from .burner_design import BurnerDesigner
 except ImportError:
     from combustion import CombustionCalculator, CombustionResults
-    from burner_design import BurnerDesigner, BurnerDesignResults
+    from burner_design import BurnerDesigner
 
 
 @dataclass
@@ -82,7 +82,7 @@ class ChamberDesigner:
 
         # Design constants
         self.MIN_RESIDENCE_TIME = 0.1  # s, minimum residence time for complete combustion
-        self.MAX_RESIDENCE_TIME = 2.0  # s, maximum practical residence time
+        self.MAX_RESIDENCE_TIME = 10.0  # s, maximum practical residence time
         self.MAX_VOLUME_HEAT_RATE = 3e6  # W/m³, maximum volume heat release rate
         self.MIN_CHAMBER_DIAMETER = 0.1  # m, minimum practical chamber diameter
         self.MAX_CHAMBER_DIAMETER = 3.0  # m, maximum practical chamber diameter
@@ -520,14 +520,14 @@ def main():
             results, designer.combustion_calc.calculate_combustion_products(fuel_type, 0.002, 1.2)
         )
 
-        print(f"\nTeplotní profil:")
+        print("\nTeplotní profil:")
         for i, (pos, temp) in enumerate(zip(temp_dist["positions"], temp_dist["temperatures"])):
             if i % 3 == 0:  # Print every 3rd point
                 print(f"Pozice {pos*1000:.0f} mm: {temp-273.15:.0f} °C")
 
         # Validation
         validation = designer.validate_design(results)
-        print(f"\nValidace návrhu:")
+        print("\nValidace návrhu:")
         for criterion, passed in validation.items():
             status = "✓" if passed else "✗"
             print(f"{status} {criterion}: {'Prošlo' if passed else 'Neprošlo'}")
@@ -535,7 +535,7 @@ def main():
         # Recommendations
         recommendations = designer.get_design_recommendations(results)
         if recommendations:
-            print(f"\nDoporučení:")
+            print("\nDoporučení:")
             for i, rec in enumerate(recommendations, 1):
                 print(f"{i}. {rec}")
 

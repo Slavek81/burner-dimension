@@ -18,17 +18,16 @@ import csv
 import pandas as pd
 from datetime import datetime
 import threading
-from typing import Dict, Any, Optional
 
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), "src"))
 
 try:
-    from combustion import CombustionCalculator, CombustionResults
-    from burner_design import BurnerDesigner, BurnerDesignResults
-    from chamber_design import ChamberDesigner, ChamberDesignResults
-    from radiation import RadiationCalculator, RadiationResults
-    from pressure_losses import PressureLossCalculator, PressureLossResults
+    from combustion import CombustionCalculator
+    from burner_design import BurnerDesigner
+    from chamber_design import ChamberDesigner
+    from radiation import RadiationCalculator
+    from pressure_losses import PressureLossCalculator
 except ImportError as e:
     print(f"Error importing modules: {e}")
     sys.exit(1)
@@ -444,7 +443,6 @@ class BurnerCalculatorGUI:
             messagebox.showerror("Chyby ve vstupních datech", error_message)
             return False
         else:
-            messagebox.showinfo("Validace", "Všechny vstupní data jsou v pořádku")
             return True
 
     def collect_input_data(self):
@@ -530,9 +528,11 @@ class BurnerCalculatorGUI:
             self.root.after(0, self._update_status, "Návrh komory...")
             chamber_calc = self.calculators["chamber"]
             chamber_results = chamber_calc.design_chamber(
-                self.input_data["heat_output"] * 1000,  # Convert kW to W
-                self.input_data["max_chamber_temp"] + 273.15,  # Convert °C to K
-                self.input_data["heat_release_density"] * 1000,  # Convert kW/m² to W/m²
+                fuel_type=self.input_data["fuel_type"],
+                required_power=self.input_data["heat_output"] * 1000,  # Convert kW to W
+                target_residence_time=0.8,  # Realistic residence time
+                # Convert °C to K
+                ambient_temperature=self.input_data["ambient_temperature"] + 273.15,
             )
             self.results["chamber"] = chamber_results
 
@@ -619,7 +619,8 @@ class BurnerCalculatorGUI:
         text += f"Hmotnostní průtok spalin: {results.flue_gas_flow_rate:.6f} kg/s\n\n"
 
         text += f"Koeficient přebytku vzduchu: {results.excess_air_ratio:.2f} [-]\n"
-        text += f"Adiabatická teplota plamene: {results.adiabatic_flame_temperature:.1f} K ({results.adiabatic_flame_temperature-273.15:.1f} °C)\n"
+        text += f"Adiabatická teplota plamene: {results.adiabatic_flame_temperature:.1f} K "
+        text += f"({results.adiabatic_flame_temperature-273.15:.1f} °C)\n"
         text += f"Tepelný výkon: {results.heat_release_rate/1000:.1f} kW\n\n"
 
         text += "Složení spalin:\n"
@@ -663,7 +664,8 @@ class BurnerCalculatorGUI:
         text += f"Průměr komory: {results.chamber_diameter:.2f} m\n"
         text += f"Povrch komory: {results.chamber_surface_area:.2f} m²\n\n"
 
-        text += f"Teplota stěny komory: {results.chamber_wall_temperature:.1f} K ({results.chamber_wall_temperature-273.15:.1f} °C)\n"
+        text += f"Teplota stěny komory: {results.chamber_wall_temperature:.1f} K "
+        text += f"({results.chamber_wall_temperature-273.15:.1f} °C)\n"
         text += f"Doba zdržení: {results.residence_time:.3f} s\n\n"
 
         text += f"Hustota tepelného toku: {results.heat_release_density/1000:.0f} kW/m³\n"
@@ -688,7 +690,8 @@ class BurnerCalculatorGUI:
             f"Tepelný tok stěna → okolí: {results.wall_to_ambient_heat_transfer/1000:.1f} kW\n\n"
         )
 
-        text += f"Účinná teplota plamene: {results.effective_flame_temperature:.1f} K ({results.effective_flame_temperature-273.15:.1f} °C)\n"
+        text += f"Účinná teplota plamene: {results.effective_flame_temperature:.1f} K "
+        text += f"({results.effective_flame_temperature-273.15:.1f} °C)\n"
         text += f"Účinná plocha radiace: {results.effective_radiation_area:.2f} m²\n"
 
         self.radiation_text.delete(1.0, tk.END)
@@ -753,7 +756,8 @@ class BurnerCalculatorGUI:
             # Chamber
             chamber = self.results["chamber"]
             text += f"Objem komory: {chamber.chamber_volume:.3f} m³\n"
-            text += f"Rozměry komory: ⌀{chamber.chamber_diameter*1000:.0f} × {chamber.chamber_length*1000:.0f} mm\n"
+            text += f"Rozměry komory: ⌀{chamber.chamber_diameter*1000:.0f} × "
+            text += f"{chamber.chamber_length*1000:.0f} mm\n"
             text += f"Doba zdržení: {chamber.residence_time:.3f} s\n\n"
 
             # Pressure
@@ -821,7 +825,7 @@ class BurnerCalculatorGUI:
             return
 
         # Ask for export format
-        export_dialog = ExportDialog(self.root, self.results, self.input_data)
+        ExportDialog(self.root, self.results, self.input_data)
 
     def new_project(self):
         """Start new project with default values."""
@@ -1057,7 +1061,7 @@ def main():
     style.theme_use("clam")
 
     # Create and run application
-    app = BurnerCalculatorGUI(root)
+    BurnerCalculatorGUI(root)
 
     # Center window on screen
     root.update_idletasks()

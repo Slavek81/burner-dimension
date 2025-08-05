@@ -10,8 +10,7 @@ Handles stoichiometric calculations, flame temperature, and combustion products.
 import json
 import os
 from dataclasses import dataclass
-from typing import Dict, Tuple, Optional
-import math
+from typing import Tuple
 
 
 @dataclass
@@ -178,8 +177,6 @@ class CombustionCalculator:
         Returns:
             float: Adiabatic flame temperature [K]
         """
-        fuel_props = self.fuel_data["fuels"][fuel_type]["properties"]
-
         # Simplified calculation based on heating value and heat capacity
         # More accurate calculation would require detailed thermodynamic properties
         base_temperature = 2200  # K, typical for natural gas
