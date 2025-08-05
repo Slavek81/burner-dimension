@@ -391,13 +391,13 @@ class BurnerCalculatorGUI:
         """Load default input values."""
         defaults = {
             "fuel_type": "natural_gas",
-            "fuel_flow_rate": "0.01",
+            "fuel_flow_rate": "0.002",
             "excess_air_ratio": "1.2",
             "ambient_temperature": "20",
             "ambient_pressure": "101325",
             "max_gas_velocity": "50",
             "supply_pressure": "3000",
-            "heat_output": "500",
+            "heat_output": "100",
             "max_chamber_temp": "1200",
         }
 
@@ -696,6 +696,13 @@ class BurnerCalculatorGUI:
                 self._display_pressure_results()
 
             self._display_summary_results()
+            
+            # Automatically switch to Results tab after calculation
+            for i in range(self.notebook.index("end")):
+                tab_text = self.notebook.tab(i, "text")
+                if "Výsledky" in tab_text:
+                    self.notebook.select(i)
+                    break
 
         except Exception as e:
             messagebox.showerror(

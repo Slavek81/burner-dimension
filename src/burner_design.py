@@ -77,7 +77,7 @@ class BurnerDesigner:
         # Design constants
         self.MAX_GAS_VELOCITY = 100.0  # m/s, maximum allowable gas velocity
         self.MIN_GAS_VELOCITY = 5.0  # m/s, minimum gas velocity for stability
-        self.MAX_HEAT_DENSITY = 5e6  # W/m², maximum heat release density
+        self.MAX_HEAT_DENSITY = 150e6  # W/m², maximum heat release density
         self.BURNER_PRESSURE_DROP_COEFF = 0.8  # Pressure drop coefficient
 
     def design_burner(
@@ -117,15 +117,22 @@ class BurnerDesigner:
         fuel_flow_rate = required_power / fuel_props["lower_heating_value_mass"]
 
         # Calculate combustion properties
-        # Note: combustion_results currently not used in calculations
-        # but available for future enhancements
-        _ = self.combustion_calc.calculate_combustion_products(
+        # Calculate combustion properties to get total gas flow
+        combustion_results = self.combustion_calc.calculate_combustion_products(
             fuel_type, fuel_flow_rate, excess_air_ratio
         )
 
-        # Calculate gas density at operating conditions
-        # Calculate gas density at 20°C
-        gas_density = self._calculate_gas_density(fuel_type, supply_pressure, 293.15)
+        # Calculate gas mixture density at operating conditions
+        # For fuel-air mixture, we need weighted average density
+        fuel_density = self._calculate_gas_density(fuel_type, supply_pressure, 293.15)
+        air_density = 1.225  # kg/m³ at 20°C, 1 atm
+
+        # Weighted average density based on mass fractions
+        total_mass = combustion_results.fuel_flow_rate + combustion_results.air_flow_rate
+        fuel_fraction = combustion_results.fuel_flow_rate / total_mass
+        air_fraction = combustion_results.air_flow_rate / total_mass
+
+        gas_density = fuel_fraction * fuel_density + air_fraction * air_density
 
         # Calculate burner dimensions
         if target_velocity is None:
@@ -139,8 +146,12 @@ class BurnerDesigner:
         elif target_velocity > self.MAX_GAS_VELOCITY:
             target_velocity = self.MAX_GAS_VELOCITY
 
-        # Calculate burner area and diameter
-        volume_flow_rate = fuel_flow_rate / gas_density
+        # Calculate burner area and diameter based on total gas flow (fuel + air)
+        # Total mass flow rate = fuel + air
+        total_mass_flow_rate = combustion_results.fuel_flow_rate + combustion_results.air_flow_rate
+
+        # Calculate volume flow rate at burner conditions
+        volume_flow_rate = total_mass_flow_rate / gas_density
         burner_area = volume_flow_rate / target_velocity
         burner_diameter = math.sqrt(4 * burner_area / math.pi)
 

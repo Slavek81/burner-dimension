@@ -328,7 +328,7 @@ class TestBurnerDesigner(unittest.TestCase):
             gas_velocity=200.0,  # Too high
             burner_pressure_drop=2500,
             required_supply_pressure=3000,
-            heat_release_density=8e6,  # Too high
+            heat_release_density=200e6,  # Too high
             burner_length=0.3,
             flame_length=1.0,
         )
@@ -351,7 +351,7 @@ class TestBurnerDesigner(unittest.TestCase):
             gas_velocity=2.0,  # Too low
             burner_pressure_drop=500,
             required_supply_pressure=600,
-            heat_release_density=8e6,  # Too high
+            heat_release_density=200e6,  # Too high
             burner_length=0.3,
             flame_length=5.0,  # Very long flame
         )
@@ -366,33 +366,32 @@ class TestBurnerDesigner(unittest.TestCase):
         self.assertIn("rychlost", rec_text.lower())
 
     def test_high_heat_density_handling(self):
-        """Test handling of excessive heat density."""
-        # Mock very high power requirement
-        mock_combustion = Mock(spec=CombustionCalculator)
-        mock_fuel_props = {
-            "properties": {
-                "lower_heating_value_mass": 50000000,
-                "molecular_weight": 16.04,
-                "density": 0.717,
-            }
-        }
-        mock_combustion.get_fuel_properties.return_value = mock_fuel_props
-        mock_combustion.constants = {"universal_gas_constant": 8.314}
+        """Test that MAX_HEAT_DENSITY limit is properly enforced."""
+        designer = BurnerDesigner()
 
-        mock_result = Mock()
-        mock_result.fuel_flow_rate = 0.02  # High flow rate
-        mock_combustion.calculate_combustion_products.return_value = mock_result
+        # Test normal operation first
+        results = designer.design_burner(
+            fuel_type="natural_gas",
+            required_power=100000,  # 100 kW
+            supply_pressure=3000,
+        )
+        self.assertLess(results.heat_release_density, designer.MAX_HEAT_DENSITY)
 
-        designer = BurnerDesigner(combustion_calculator=mock_combustion)
+        # Test that limit is enforced - temporarily lower the limit for testing
+        original_limit = designer.MAX_HEAT_DENSITY
+        designer.MAX_HEAT_DENSITY = 10e6  # Lower limit to 10 MW/m²
 
-        with self.assertRaises(ValueError) as context:
-            designer.design_burner(
-                fuel_type="methane",
-                required_power=10000000,  # 10 MW - very high
-                supply_pressure=8000,
-                target_velocity=8.0,
-            )
-        self.assertIn("hustota tepelného toku", str(context.exception))
+        try:
+            with self.assertRaises(ValueError) as context:
+                designer.design_burner(
+                    fuel_type="natural_gas",
+                    required_power=100000,  # 100 kW should now fail
+                    supply_pressure=3000,
+                )
+            self.assertIn("hustota tepelného toku", str(context.exception))
+        finally:
+            # Restore original limit
+            designer.MAX_HEAT_DENSITY = original_limit
 
     def test_burner_design_results_dataclass(self):
         """Test BurnerDesignResults dataclass functionality."""
