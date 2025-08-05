@@ -716,10 +716,23 @@ class BurnerCalculatorGUI:
         text = "VÝSLEDKY VÝPOČTU SPALOVÁNÍ\n"
         text += "=" * 50 + "\n\n"
 
+        # Základní parametry paliva
         text += f"Typ paliva: {self.input_data['fuel_type']}\n"
-        text += f"Hmotnostní průtok paliva: {results.fuel_flow_rate:.6f} kg/s\n"
-        text += f"Hmotnostní průtok vzduchu: {results.air_flow_rate:.6f} kg/s\n"
-        text += f"Hmotnostní průtok spalin: {results.flue_gas_flow_rate:.6f} kg/s\n\n"
+        text += f"Koeficient přebytku vzduchu: {self.input_data['excess_air_ratio']} [-]\n\n"
+
+        # Hmotnostní průtoky
+        text += "HMOTNOSTNÍ PRŮTOKY:\n"
+        text += "-" * 25 + "\n"
+        text += f"Palivo: {results.fuel_flow_rate:.6f} kg/s ({results.fuel_flow_rate*3600:.3f} kg/h)\n"
+        text += f"Vzduch: {results.air_flow_rate:.6f} kg/s ({results.air_flow_rate*3600:.3f} kg/h)\n"
+        text += f"Spaliny: {results.flue_gas_flow_rate:.6f} kg/s ({results.flue_gas_flow_rate*3600:.3f} kg/h)\n"
+        text += f"Celkový průtok (palivo+vzduch): {results.fuel_flow_rate + results.air_flow_rate:.6f} kg/s\n\n"
+
+        # Poměry a stechiometrie
+        text += "SPALOVACÍ POMĚRY:\n"
+        text += "-" * 20 + "\n"
+        text += f"Teoretická potřeba vzduchu: {results.air_flow_rate/results.fuel_flow_rate:.1f} kg vzduchu/kg paliva\n"
+        text += f"Množství vzniklých spalin: {results.flue_gas_flow_rate/results.fuel_flow_rate:.1f} kg spalin/kg paliva\n\n"
 
         text += f"Koeficient přebytku vzduchu: {results.excess_air_ratio:.2f} [-]\n"
         text += (
@@ -742,16 +755,35 @@ class BurnerCalculatorGUI:
         text = "VÝSLEDKY NÁVRHU HOŘÁKU\n"
         text += "=" * 50 + "\n\n"
 
+        # Geometrické rozměry
+        text += "GEOMETRICKÉ ROZMĚRY:\n"
+        text += "-" * 25 + "\n"
         text += f"Průměr hořáku: {results.burner_diameter*1000:.1f} mm\n"
-        text += f"Plocha hořáku: {results.burner_area*1000000:.1f} mm²\n"
-        text += f"Délka hořáku: {results.burner_length*1000:.0f} mm\n\n"
+        text += f"Plocha hořáku: {results.burner_area*1000000:.1f} mm² ({results.burner_area:.6f} m²)\n"
+        text += f"Délka hořáku: {results.burner_length*1000:.0f} mm\n"
+        text += f"Poměr L/D: {results.burner_length/results.burner_diameter:.1f} [-]\n\n"
 
-        text += f"Rychlost plynu na výstupu: {results.gas_velocity:.1f} m/s\n"
-        text += f"Odhadovaná délka plamene: {results.flame_length:.2f} m\n\n"
+        # Provozní parametry
+        text += "PROVOZNÍ PARAMETRY:\n"
+        text += "-" * 23 + "\n"
+        text += f"Rychlost plynu: {results.gas_velocity:.1f} m/s\n"
+        text += f"Hustota tepelného toku: {results.heat_release_density/1e6:.1f} MW/m²\n"
+        text += f"Tepelný výkon: {self.input_data['heat_output']} kW\n"
+        text += f"Specifický výkon: {float(self.input_data['heat_output'])*1000/results.burner_area:.0f} W/m²\n\n"
 
-        text += f"Tlakový spád na hořáku: {results.burner_pressure_drop:.0f} Pa\n"
-        text += (
-            f"Požadovaný přítlak plynu: {results.required_supply_pressure:.0f} Pa\n\n"
+        # Tlakové parametry
+        text += "TLAKOVÉ PARAMETRY:\n"
+        text += "-" * 21 + "\n"
+        text += f"Tlaková ztráta hořáku: {results.burner_pressure_drop:.0f} Pa\n"
+        text += f"Požadovaný tlak plynu: {results.required_supply_pressure:.0f} Pa\n"
+        text += f"Dostupný tlak plynu: {self.input_data['supply_pressure']} Pa\n"
+        text += f"Rezerva tlaku: {float(self.input_data['supply_pressure']) - results.required_supply_pressure:.0f} Pa\n\n"
+
+        # Plamene
+        text += "PARAMETRY PLAMENE:\n"
+        text += "-" * 20 + "\n"
+        text += f"Odhadovaná délka plamene: {results.flame_length*1000:.0f} mm\n"
+        text += f"Poměr plamene k hořáku: {results.flame_length/results.burner_length:.1f} [-]\n\n"
         )
 
         text += f"Hustota tepelného toku: {results.heat_release_density/1000:.0f} kW/m²\n"
@@ -766,14 +798,29 @@ class BurnerCalculatorGUI:
         text = "VÝSLEDKY NÁVRHU SPALOVACÍ KOMORY\n"
         text += "=" * 50 + "\n\n"
 
-        text += f"Objem komory: {results.chamber_volume:.3f} m³\n"
-        text += f"Délka komory: {results.chamber_length:.2f} m\n"
-        text += f"Průměr komory: {results.chamber_diameter:.2f} m\n"
-        text += f"Povrch komory: {results.chamber_surface_area:.2f} m²\n\n"
+        # Geometrické rozměry komory
+        text += "GEOMETRICKÉ ROZMĚRY:\n"
+        text += "-" * 25 + "\n"
+        text += f"Objem komory: {results.chamber_volume:.3f} m³ ({results.chamber_volume*1000:.0f} litrů)\n"
+        text += f"Délka komory: {results.chamber_length:.2f} m ({results.chamber_length*1000:.0f} mm)\n"
+        text += f"Průměr komory: {results.chamber_diameter:.2f} m ({results.chamber_diameter*1000:.0f} mm)\n"
+        text += f"Povrch komory: {results.chamber_surface_area:.2f} m²\n"
+        text += f"Poměr L/D komory: {results.chamber_length/results.chamber_diameter:.1f} [-]\n\n"
 
-        text += f"Teplota stěny komory: {results.chamber_wall_temperature:.1f} K "
-        text += f"({results.chamber_wall_temperature-273.15:.1f} °C)\n"
-        text += f"Doba zdržení: {results.residence_time:.3f} s\n\n"
+        # Tepelné parametry
+        text += "TEPELNÉ PARAMETRY:\n"  
+        text += "-" * 21 + "\n"
+        text += f"Doba zdržení spalin: {results.residence_time:.3f} s\n"
+        text += f"Objemová hustota výkonu: {results.volume_heat_release_rate/1e6:.1f} MW/m³\n"
+        text += f"Teplota stěny komory: {results.wall_temperature:.0f} K ({results.wall_temperature-273.15:.0f} °C)\n"
+        text += f"Tepelná účinnost: {results.thermal_efficiency:.1f} %\n\n"
+
+        # Tepelné ztráty
+        text += "ANALÝZA TEPELNÝCH ZTRÁT:\n"
+        text += "-" * 27 + "\n"
+        text += f"Rychlost ztrát tepla: {results.heat_loss_rate/1000:.1f} kW\n"
+        text += f"Součinitel přestupu tepla: {results.heat_transfer_coefficient:.1f} W/m²·K\n"
+        text += f"Podíl ztrát z celkového výkonu: {results.heat_loss_rate/(float(self.input_data['heat_output'])*1000)*100:.1f} %\n\n"
 
         text += f"Hustota tepelného toku: {results.volume_heat_release_rate/1000:.0f} kW/m³\n"
         text += f"Součinitel přestupu tepla: {results.heat_transfer_coefficient:.1f} W/(m²·K)\n"
