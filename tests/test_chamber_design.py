@@ -522,6 +522,10 @@ class TestChamberDesigner(unittest.TestCase):
         self.assertEqual(results.heat_loss_rate, 5000.0)
         self.assertEqual(results.thermal_efficiency, 80.0)
         self.assertEqual(results.volume_heat_release_rate, 1e6)
+        
+        # Test backward compatibility property
+        self.assertEqual(results.chamber_wall_temperature, 800.0)
+        self.assertEqual(results.wall_temperature, results.chamber_wall_temperature)
 
     def test_edge_case_minimal_chamber(self):
         """Test design of minimal chamber."""

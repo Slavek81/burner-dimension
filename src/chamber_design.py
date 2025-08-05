@@ -48,6 +48,16 @@ class ChamberDesignResults:
     thermal_efficiency: float
     volume_heat_release_rate: float
 
+    @property
+    def chamber_wall_temperature(self) -> float:
+        """
+        Alias for wall_temperature for backward compatibility.
+        
+        Returns:
+            float: Average wall temperature [K]
+        """
+        return self.wall_temperature
+
 
 class ChamberDesigner:
     """
