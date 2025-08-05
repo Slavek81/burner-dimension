@@ -61,7 +61,7 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
     @patch('gui.gui.ChamberDesigner')
     @patch('gui.gui.RadiationCalculator')
     @patch('gui.gui.PressureLossCalculator')
-    def test_initialization_success(self, mock_pressure, mock_radiation, 
+    def test_initialization_success(self, mock_pressure, mock_radiation,
                                     mock_chamber, mock_burner, mock_combustion):
         """Test successful GUI initialization."""
         # Setup mocks

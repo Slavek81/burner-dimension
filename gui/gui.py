@@ -423,7 +423,6 @@ class BurnerCalculatorGUI:
             if self.input_data["heat_output"] <= 0:
                 self.validation_errors.append("Požadovaný tepelný výkon musí být větší než nula")
 
-
         except ValueError as e:
             self.validation_errors.append(f"Chyba při převodu číselných hodnot: {e}")
         except Exception as e:
@@ -544,9 +543,9 @@ class BurnerCalculatorGUI:
             # Pressure loss calculations
             self.root.after(0, self._update_status, "Výpočet tlakových ztrát...")
             pressure_calc = self.calculators["pressure"]
-            
+
             # Create sample pipe segments and fittings for demonstration
-            from src.pressure_losses import PipeSegment, Fitting
+            from src.pressure_losses import PipeSegment
             sample_pipe_segments = [
                 PipeSegment(
                     length=chamber_results.chamber_length + 2.0,  # Chamber + connection pipes
@@ -556,17 +555,17 @@ class BurnerCalculatorGUI:
                     elevation_change=0.5  # Small elevation change
                 )
             ]
-            
+
             sample_fittings = pressure_calc.create_standard_fittings_list(
                 burner_results.burner_diameter
             )
-            
+
             # Calculate gas density from combustion results
             fuel_props = combustion_calc.get_fuel_properties(self.input_data["fuel_type"])
             molecular_weight = fuel_props["properties"]["molecular_weight"] / 1000  # g/mol to kg/mol
             gas_constant = combustion_calc.constants["universal_gas_constant"]
             gas_density = (101325 * molecular_weight) / (gas_constant * 573)  # At ~300°C
-            
+
             pressure_results = pressure_calc.calculate_system_pressure_losses(
                 pipe_segments=sample_pipe_segments,
                 fittings=sample_fittings,

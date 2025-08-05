@@ -61,7 +61,6 @@ class TestRadiationCalculator(unittest.TestCase):
     def test_load_material_data_default(self):
         """Test loading of default material data when file is not available."""
         # Use correct path to data directory
-        data_path = os.path.join(os.path.dirname(__file__), "..", "data", "fuels.json")
         with patch('builtins.open', side_effect=FileNotFoundError):
             combustion_calc = Mock(spec=CombustionCalculator)
             combustion_calc.constants = {"stefan_boltzmann_constant": 5.67e-8}
