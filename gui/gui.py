@@ -747,7 +747,7 @@ class BurnerCalculatorGUI:
             f"Požadovaný přítlak plynu: {results.required_supply_pressure:.0f} Pa\n\n"
         )
 
-        text += f"Hustota tepelného toku: {results.volume_heat_release_rate/1000:.0f} kW/m²\n"
+        text += f"Hustota tepelného toku: {results.heat_release_density/1000:.0f} kW/m²\n"
 
         self.burner_text.delete(1.0, tk.END)
         self.burner_text.insert(1.0, text)
@@ -781,16 +781,15 @@ class BurnerCalculatorGUI:
         text = "VÝSLEDKY VÝPOČTU RADIAČNÍHO PŘENOSU TEPLA\n"
         text += "=" * 50 + "\n\n"
 
-        text += f"Radiační tepelný tok: {results.total_heat_transfer/1000:.1f} kW\n"
+        text += f"Radiační tepelný tok: {results.total_radiation_heat_transfer/1000:.1f} kW\n"
         text += f"Emisivita plamene: {results.flame_emissivity:.3f} [-]\n"
         text += f"Emisivita stěny: {results.wall_emissivity:.3f} [-]\n\n"
 
         text += f"Tepelný tok plamen → stěna: {results.flame_to_wall_heat_transfer/1000:.1f} kW\n"
         text += f"Tepelný tok stěna → okolí: {results.wall_to_ambient_heat_transfer/1000:.1f} kW\n\n"
 
-        text += f"Účinná teplota plamene: {results.effective_flame_temperature:.1f} K "
-        text += f"({results.effective_flame_temperature-273.15:.1f} °C)\n"
-        text += f"Účinná plocha radiace: {results.effective_radiation_area:.2f} m²\n"
+        text += f"Střední beam length: {results.mean_beam_length:.3f} m\n"
+        text += f"Účinnost radiačního přenosu: {results.radiation_efficiency:.1f} %\n"
 
         self.radiation_text.delete(1.0, tk.END)
         self.radiation_text.insert(1.0, text)
@@ -806,10 +805,11 @@ class BurnerCalculatorGUI:
 
         text += "Jednotlivé tlakové ztráty:\n"
         text += f"  Hořák: {results.burner_pressure_loss:.0f} Pa\n"
-        text += f"  Spalovací komora: {results.chamber_pressure_loss:.0f} Pa\n"
-        text += f"  Výstupní potrubí: {results.exit_pipe_pressure_loss:.0f} Pa\n\n"
+        text += f"  Třecí ztráty v potrubí: {results.friction_losses:.0f} Pa\n"
+        text += f"  Místní odpory: {results.minor_losses:.0f} Pa\n"
+        text += f"  Výškové ztráty: {results.elevation_losses:.0f} Pa\n\n"
 
-        text += f"Rychlost spalin v komoře: {results.flue_gas_velocity:.2f} m/s\n"
+        text += f"Rychlostní tlak: {results.velocity_pressure:.1f} Pa\n"
         text += f"Reynoldsovo číslo: {results.reynolds_number:.0f} [-]\n"
         text += f"Součinitel tření: {results.friction_factor:.6f} [-]\n"
 
@@ -870,7 +870,7 @@ class BurnerCalculatorGUI:
             # Radiation
             radiation = self.results["radiation"]
             text += (
-                f"Radiační tepelný tok: {radiation.total_heat_transfer/1000:.1f} kW\n"
+                f"Radiační tepelný tok: {radiation.total_radiation_heat_transfer/1000:.1f} kW\n"
             )
 
         self.results_text.delete(1.0, tk.END)
