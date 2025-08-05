@@ -102,7 +102,6 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
         mock_radiation.assert_called_once()
         mock_pressure.assert_called_once()
 
-    @patch("gui.messagebox")
     @patch("gui.CombustionCalculator", side_effect=Exception("Calculator error"))
     @patch("gui.ttk")
     @patch("gui.tk")
@@ -173,9 +172,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 "ambient_pressure": Mock(),
                 "max_gas_velocity": Mock(),
                 "supply_pressure": Mock(),
-                "target_residence_time": Mock(),
-                "wall_insulation_thickness": Mock(),
-                "target_efficiency": Mock(),
+                "heat_output": Mock(),
+                "max_chamber_temp": Mock(),
             }
 
             # Call method
@@ -200,9 +198,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 "ambient_pressure": Mock(),
                 "max_gas_velocity": Mock(),
                 "supply_pressure": Mock(),
-                "target_residence_time": Mock(),
-                "wall_insulation_thickness": Mock(),
-                "target_efficiency": Mock(),
+                "heat_output": Mock(),
+                "max_chamber_temp": Mock(),
             }
 
             # Mock widget get methods
@@ -213,9 +210,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
             gui.input_vars["ambient_pressure"].get.return_value = "101325"
             gui.input_vars["max_gas_velocity"].get.return_value = "25"
             gui.input_vars["supply_pressure"].get.return_value = "3000"
-            gui.input_vars["target_residence_time"].get.return_value = "0.5"
-            gui.input_vars["wall_insulation_thickness"].get.return_value = "0.1"
-            gui.input_vars["target_efficiency"].get.return_value = "0.85"
+            gui.input_vars["heat_output"].get.return_value = "100"
+            gui.input_vars["max_chamber_temp"].get.return_value = "1200"
 
             # Call method
             result = gui.collect_input_data()
@@ -228,9 +224,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
             self.assertEqual(result["ambient_pressure"], 101325)
             self.assertEqual(result["max_gas_velocity"], 25)
             self.assertEqual(result["supply_pressure"], 3000)
-            self.assertEqual(result["target_residence_time"], 0.5)
-            self.assertEqual(result["wall_insulation_thickness"], 0.1)
-            self.assertEqual(result["target_efficiency"], 0.85)
+            self.assertEqual(result["heat_output"], 100)
+            self.assertEqual(result["max_chamber_temp"], 1200)
 
     def test_validate_input_valid(self):
         """Test input validation with valid data."""
@@ -244,9 +239,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 "ambient_pressure": 101325,
                 "max_gas_velocity": 25,
                 "supply_pressure": 3000,
-                "target_residence_time": 0.5,
-                "wall_insulation_thickness": 0.1,
-                "target_efficiency": 0.85,
+                "heat_output": 100,
+                "max_chamber_temp": 1200,
             }
 
             # Call method
@@ -268,9 +262,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 "ambient_pressure": -1000,  # Invalid: negative
                 "max_gas_velocity": -10,  # Invalid: negative
                 "supply_pressure": -100,  # Invalid: negative
-                "target_residence_time": -0.1,  # Invalid: negative
-                "wall_insulation_thickness": -0.01,  # Invalid: negative
-                "target_efficiency": 1.5,  # Invalid: >1
+                "heat_output": -100,  # Invalid: negative
+                "max_chamber_temp": -1200,  # Invalid: negative
             }
 
             # Call method
@@ -301,8 +294,7 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
             mock_thread_instance.start.assert_called_once()
             gui._update_status.assert_called_with("Probíhají výpočty...")
 
-    @patch("gui.messagebox")
-    def test_run_calculations_validation_error(self, mock_messagebox):
+    def test_calculation_finished_success(self):
         """Test calculation execution with validation errors."""
         with patch.object(BurnerCalculatorGUI, "__init__", lambda x, y: None):
             gui = BurnerCalculatorGUI.__new__(BurnerCalculatorGUI)
@@ -330,9 +322,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 "excess_air_ratio": 1.2,
                 "ambient_temperature": 293.15,
                 "supply_pressure": 3000,
-                "target_residence_time": 0.5,
-                "wall_insulation_thickness": 0.1,
-                "target_efficiency": 0.85,
+                "heat_output": 100,
+                "max_chamber_temp": 1200,
             }
             gui.results = {}
             gui._update_status = Mock()
@@ -444,7 +435,6 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 gui.input_vars["fuel_flow_rate"].insert.assert_called_with(0, "0.003")
 
     @patch("gui.filedialog")
-    @patch("gui.messagebox")
     def test_load_input_file_error(self, mock_messagebox, mock_filedialog):
         """Test input file loading error handling."""
         with patch.object(BurnerCalculatorGUI, "__init__", lambda x, y: None):
@@ -486,7 +476,6 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 mock_file().write.assert_called()
 
     @patch("gui.filedialog")
-    @patch("gui.messagebox")
     def test_save_input_file_error(self, mock_messagebox, mock_filedialog):
         """Test input file saving error handling."""
         with patch.object(BurnerCalculatorGUI, "__init__", lambda x, y: None):
@@ -526,7 +515,6 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 mock_file.assert_called_once_with(test_file, "w", encoding="utf-8")
                 mock_file().write.assert_called()
 
-    @patch("gui.messagebox")
     def test_export_results_no_data(self, mock_messagebox):
         """Test results export with no data."""
         with patch.object(BurnerCalculatorGUI, "__init__", lambda x, y: None):
@@ -553,7 +541,6 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
             # Verify status updated
             gui.status_label.config.assert_called_with(text="Test message")
 
-    @patch("gui.messagebox")
     def test_calculation_finished_success(self, mock_messagebox):
         """Test calculation finished with success."""
         with patch.object(BurnerCalculatorGUI, "__init__", lambda x, y: None):
@@ -561,6 +548,13 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
             gui.results = {"combustion": Mock(), "burner": Mock()}
             gui._update_status = Mock()
             gui._display_all_results = Mock()
+            gui.progress = Mock()
+            gui.root = Mock()
+            gui.root.winfo_children = Mock(return_value=[])
+            gui.notebook = Mock()
+            gui.notebook.index = Mock(return_value=3)
+            gui.notebook.tab = Mock(return_value="Výsledky")
+            gui.notebook.select = Mock()
 
             # Call method
             gui._calculation_finished()
@@ -570,7 +564,6 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
             gui._display_all_results.assert_called_once()
             mock_messagebox.showinfo.assert_called_once()
 
-    @patch("gui.messagebox")
     def test_calculation_finished_with_errors(self, mock_messagebox):
         """Test calculation finished with errors."""
         with patch.object(BurnerCalculatorGUI, "__init__", lambda x, y: None):
@@ -578,6 +571,13 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
             gui.results = {"errors": {"combustion": "Error occurred"}}
             gui._update_status = Mock()
             gui._display_all_results = Mock()
+            gui.progress = Mock()
+            gui.root = Mock()
+            gui.root.winfo_children = Mock(return_value=[])
+            gui.notebook = Mock()
+            gui.notebook.index = Mock(return_value=3)
+            gui.notebook.tab = Mock(return_value="Výsledky")
+            gui.notebook.select = Mock()
 
             # Call method
             gui._calculation_finished()
@@ -678,9 +678,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 "ambient_pressure": 50000,  # Low pressure but positive
                 "max_gas_velocity": 0.1,  # Very low but positive
                 "supply_pressure": 100,  # Low but positive
-                "target_residence_time": 0.01,  # Very short but positive
-                "wall_insulation_thickness": 0.001,  # Very thin but positive
-                "target_efficiency": 0.1,  # Low but valid
+                "heat_output": 0.1,  # Very low but positive
+                "max_chamber_temp": 100,  # Low but valid
             }
 
             # Call method
@@ -703,9 +702,8 @@ class TestBurnerCalculatorGUI(unittest.TestCase):
                 "ambient_pressure": -1000,  # Invalid
                 "max_gas_velocity": -10,  # Invalid
                 "supply_pressure": -100,  # Invalid
-                "target_residence_time": -0.1,  # Invalid
-                "wall_insulation_thickness": -0.01,  # Invalid
-                "target_efficiency": 1.5,  # Invalid
+                "heat_output": -100,  # Invalid
+                "max_chamber_temp": -1200,  # Invalid
             }
 
             # Call method

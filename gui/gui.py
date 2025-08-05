@@ -453,8 +453,9 @@ class BurnerCalculatorGUI:
         self.validation_errors = []
 
         try:
-            # Get input values
-            self.collect_input_data()
+            # Get input values if not already collected
+            if not hasattr(self, 'input_data') or not self.input_data:
+                self.collect_input_data()
 
             # Validate fuel flow rate
             if self.input_data["fuel_flow_rate"] <= 0:
@@ -468,10 +469,10 @@ class BurnerCalculatorGUI:
                     "Koeficient přebytku vzduchu musí být ≥ 1.0"
                 )
 
-            # Validate temperatures
+            # Validate temperatures (now in Kelvin)
             if (
-                self.input_data["ambient_temperature"] < -50
-                or self.input_data["ambient_temperature"] > 100
+                self.input_data["ambient_temperature"] < 223.15  # -50°C
+                or self.input_data["ambient_temperature"] > 373.15  # 100°C
             ):
                 self.validation_errors.append(
                     "Teplota okolí musí být mezi -50°C a 100°C"
@@ -550,16 +551,26 @@ class BurnerCalculatorGUI:
         ]
 
         for field in numeric_fields:
+            if field not in self.input_vars:
+                # Skip fields that don't exist in the current GUI setup
+                continue
+                
             value_str = self.input_vars[field].get().strip()
             if not value_str:
                 raise ValueError(f"Pole '{field}' je prázdné")
 
             try:
-                self.input_data[field] = float(value_str)
+                value = float(value_str)
+                # Convert temperature from Celsius to Kelvin
+                if field == "ambient_temperature":
+                    value += 273.15
+                self.input_data[field] = value
             except ValueError:
                 raise ValueError(
                     f"Neplatná číselná hodnota v poli '{field}': {value_str}"
                 )
+        
+        return self.input_data
 
     def run_calculations(self):
         """Run all calculations in separate thread."""
@@ -619,8 +630,8 @@ class BurnerCalculatorGUI:
                 fuel_type=self.input_data["fuel_type"],
                 required_power=self.input_data["heat_output"] * 1000,  # Convert kW to W
                 target_residence_time=0.8,  # Realistic residence time
-                # Convert °C to K
-                ambient_temperature=self.input_data["ambient_temperature"] + 273.15,
+                # Temperature already in K from collect_input_data
+                ambient_temperature=self.input_data["ambient_temperature"],
             )
             self.results["chamber"] = chamber_results
 
@@ -708,6 +719,21 @@ class BurnerCalculatorGUI:
                         subchild
                     ):
                         subchild.configure(state="normal")
+        
+        # Handle success/error cases
+        if "errors" in self.results and self.results["errors"]:
+            self._update_status("Výpočty dokončeny s chybami")
+            messagebox.showwarning(
+                "Chyby ve výpočtu",
+                "Výpočty byly dokončeny s chybami. Zkontrolujte vstupní parametry."
+            )
+        else:
+            self._update_status("Výpočty dokončeny")
+            self._display_all_results()
+            messagebox.showinfo(
+                "Výpočty dokončeny",
+                "Všechny výpočty byly úspěšně dokončeny."
+            )
 
     def _display_all_results(self):
         """Display all calculation results in respective tabs."""
@@ -1007,6 +1033,27 @@ class BurnerCalculatorGUI:
 
             except Exception as e:
                 messagebox.showerror("Chyba", f"Chyba při ukládání souboru:\n{e}")
+
+    def clear_results(self):
+        """Clear all calculation results from the GUI."""
+        self.results = {}
+        
+        # Clear all result text widgets
+        if hasattr(self, 'combustion_results_text'):
+            self.combustion_results_text.delete("1.0", "end")
+        if hasattr(self, 'burner_results_text'):
+            self.burner_results_text.delete("1.0", "end")
+        if hasattr(self, 'chamber_results_text'):
+            self.chamber_results_text.delete("1.0", "end")
+        if hasattr(self, 'radiation_results_text'):
+            self.radiation_results_text.delete("1.0", "end")
+        if hasattr(self, 'pressure_results_text'):
+            self.pressure_results_text.delete("1.0", "end")
+        if hasattr(self, 'overall_results_text'):
+            self.overall_results_text.delete("1.0", "end")
+        
+        # Update status
+        self._update_status("Výsledky vymazány", "Všechny výsledky byly úspěšně vymazány.")
 
     def export_results(self):
         """Export calculation results to various formats."""
